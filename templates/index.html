@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="">
 <head>
+    {% set height = bit_end - bit_start + 1 %}
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow-x: scroll;
         }
-        .img-display, .label-time-wrapper {display: flex;}
-        .input-img {height: {{ 16 * pixel_scale }}px;}
+        .img-display, .label-time-wrapper {
+            display: flex;
+        }
+        .input-img {
+            height: {{ height * pixel_scale }}px;
+        }
         .pixel, .selection {
             position: absolute;
             z-index: 1;
@@ -21,22 +26,23 @@
         .selection {background-color: rgba(0, 255, 0, 0.2);}
         .label-bit-wrapper {
             position: absolute;
-            width: 50px;
+            width: {{ 5 * pixel_scale }}px;
             color: red;
             text-shadow: 1px 1px 2px black;
             z-index: 2;
+            user-select: none;
         }
         .label-bit {
-            margin-bottom: 40px;
-            line-height: 10px;
-            font-size: 15px;
+            margin-bottom: {{ 4 * pixel_scale }}px;
+            line-height: {{ pixel_scale }}px;
+            font-size: {{ 1.5 * pixel_scale }}px;
         }
         .label-bit:last-child {margin-bottom: 0;}
         .label-bit::after {content: " -"}
         .label-time {
             display: inline-table;
-            width: 100px;
-            margin-top: 10px;
+            width: {{ 10 * pixel_scale }}px;
+            margin-top: {{ pixel_scale }}px;
         }
         .label-time::before {
             content: "-";
@@ -44,7 +50,11 @@
             transform: rotate(90deg) translate(-28px, -4px);
             color: red;
             text-shadow: 1px 1px 3px black;
-            font-size: 40px;
+            font-size: {{ 4 * pixel_scale }}px;
+        }
+        .output {
+            width: 50vw;
+            position: absolute;
         }
         img {
             image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
@@ -62,10 +72,9 @@
         <div class="pixel" id="mouse2"></div>
         <div class="selection" id="selection"></div>
         <div class="label-bit-wrapper">
-            <div class="label-bit">0</div>
-            <div class="label-bit">5</div>
-            <div class="label-bit">10</div>
-            <div class="label-bit">15</div>
+            {% for val in range(bit_start, bit_end + 1, 5) %}
+            <div class="label-bit">{{ val }}</div>
+            {% endfor %}
         </div>
         <div class="img-display">
             {% for img in imgs %}
@@ -82,13 +91,16 @@
     <script>
         const time_offset = {{ time_offset }}
         const pixelScale = {{ pixel_scale }}
+        const bitStart = {{ bit_start }}
+        const bitEnd = {{ bit_end }}
+        const bitRange = {{ height }}
         const img = document.querySelector('.input-img')
         const imgContainer = document.querySelector('.img-container')
         const div1 = document.getElementById('mouse')
         const div2 = document.getElementById('mouse2')
         const selection = document.getElementById('selection')
-        const bitStart = document.getElementById('bit-start')
-        const bitEnd = document.getElementById('bit-end')
+        const bitStartElem = document.getElementById('bit-start')
+        const bitEndElem = document.getElementById('bit-end')
         const timeStart = document.getElementById('time-start')
         const timeEnd = document.getElementById('time-end')
         let selecting = false;
@@ -97,7 +109,7 @@
             const clientX = event.clientX + window.scrollX
             const clientY = event.clientY + window.scrollY
             div.style.left = `${clientX - (clientX % pixelScale)}px`
-            div.style.top = `${Math.min(clientY - (clientY % pixelScale), 15 * pixelScale)}px`
+            div.style.top = `${Math.min(clientY - (clientY % pixelScale), (bitRange - 1) * pixelScale)}px`
         }
 
         function parse_time(millisecond) {
@@ -124,8 +136,8 @@
                 start: time_offset + 200 * Math.trunc(left / pixelScale),
                 end: time_offset + 200 * Math.trunc(right / pixelScale - 1)
             }
-            bitStart.innerText = String(bit.start)
-            bitEnd.innerText = String(bit.end)
+            bitStartElem.innerText = String(bit.start)
+            bitEndElem.innerText = String(bit.end)
             timeStart.innerText = parse_time(time.start)
             timeEnd.innerText = parse_time(time.end)
         }
@@ -152,7 +164,8 @@
             }
         }
         document.onscroll = function () {
-            document.querySelector('.label-bit-wrapper').style.left = window.scrollX + 'px'
+            document.querySelector('.label-bit-wrapper').style.left =
+                document.querySelector('.output').style.left = window.scrollX + 'px'
         }
 
         function show_selection () {
@@ -173,13 +186,18 @@
             selection.style.width = `${left2 - left1 + pixelScale}px`
         }
 
-        (function () {
+        (function add_time_label() {
             const timeWrapper = document.querySelector('.label-time-wrapper')
             const imgWidth = img.width
             let html = '';
             let time = time_offset;
 
-            while ((time - time_offset) / 1000 * 5 < imgWidth) {
+            if (imgWidth === 0) {
+                setTimeout(add_time_label)
+                return
+            }
+
+            while ((time - time_offset) / 100 * 5 < imgWidth) {
                 html += `<span class="label-time">${parse_time(time)}</span>`
                 time += 2000
             }
