@@ -77,16 +77,14 @@
             {% endfor %}
         </div>
         <div class="img-display">
-            {% for img in imgs %}
-                <img src="{{ img }}" class="input-img" style="display: inline" alt="">
-            {% endfor %}
-            <br />
+            <img src="{{ img }}" class="input-img" style="display: inline" alt="">
         </div>
     </div>
     <div class="label-time-wrapper"></div>
     <div class="output">
         Bit range: <span id="bit-start"></span> - <span id="bit-end"></span><br/>
-        Time: <span id="time-start"></span> - <span id="time-end"></span>
+        Time: <span id="time-start"></span> - <span id="time-end"></span><br/>
+        <a href="#" id="submit-link">Submit</a>
     </div>
     <script>
         const time_offset = {{ time_offset }}
@@ -103,6 +101,7 @@
         const bitEndElem = document.getElementById('bit-end')
         const timeStart = document.getElementById('time-start')
         const timeEnd = document.getElementById('time-end')
+        const submitA = document.getElementById('submit-link')
         let selecting = false;
 
         function set_pixel_pos(div, event) {
@@ -140,6 +139,7 @@
             bitEndElem.innerText = String(bit.end)
             timeStart.innerText = parse_time(time.start)
             timeEnd.innerText = parse_time(time.end)
+            submitA.href = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_offset=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
         }
 
         document.onclick = function (e) {

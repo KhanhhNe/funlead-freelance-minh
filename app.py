@@ -7,19 +7,20 @@ app = Flask(__name__)
 
 @app.route('/')
 def main_route():
-    imgs = [os.path.join('imgs', filename) for filename in os.listdir('imgs') if 'labelled' not in filename]
+    img = [os.path.join('imgs', filename) for filename in os.listdir('imgs') if 'labelled' not in filename][0]
     if request.args.get('time_offset'):
-        time_offset = request.args['time_offset']
+        time_offset_str = request.args['time_offset']
     else:
-        time_offset = '14:16:04'
-    hours, minutes, secs = map(int, time_offset.split(':'))
+        time_offset_str = '14:16:04'
+    time_end_str = request.args.get('time_end', '')
+    hours, minutes, secs = map(int, time_offset_str.split(':'))
     time_offset = sum([hours * 60**2, minutes * 60, secs]) * 1000
 
-    bit_start = request.args.get('bit_start', 0)
-    bit_end = request.args.get('bit_end', 15)
+    bit_start = int(request.args.get('bit_start', '0'))
+    bit_end = int(request.args.get('bit_end', '15'))
 
     return render_template(
-        'index.html', imgs=imgs[:1], pixel_scale=10,
+        'index.html', img=img, pixel_scale=10,
         time_offset=time_offset,
         bit_start=bit_start,
         bit_end=bit_end
