@@ -87,18 +87,19 @@
         <a href="#" id="submit-link">Submit</a>
     </div>
     <script>
-        const time_offset = {{ time_offset }}
+        const time_start = {{ time_start }}
+        const time_end = {{ time_end }}
         const pixelScale = {{ pixel_scale }}
-        const bitStart = {{ bit_start }}
-        const bitEnd = {{ bit_end }}
+        const bit_start = {{ bit_start }}
+        const bit_end = {{ bit_end }}
         const bitRange = {{ height }}
         const img = document.querySelector('.input-img')
         const imgContainer = document.querySelector('.img-container')
         const div1 = document.getElementById('mouse')
         const div2 = document.getElementById('mouse2')
         const selection = document.getElementById('selection')
-        const bitStartElem = document.getElementById('bit-start')
-        const bitEndElem = document.getElementById('bit-end')
+        const bitStart = document.getElementById('bit-start')
+        const bitEnd = document.getElementById('bit-end')
         const timeStart = document.getElementById('time-start')
         const timeEnd = document.getElementById('time-end')
         const submitA = document.getElementById('submit-link')
@@ -132,11 +133,11 @@
                 end: Math.trunc(bottom / pixelScale - 1)
             }
             let time = {
-                start: time_offset + 200 * Math.trunc(left / pixelScale),
-                end: time_offset + 200 * Math.trunc(right / pixelScale - 1)
+                start: time_start + 200 * Math.trunc(left / pixelScale),
+                end: time_start + 200 * Math.trunc(right / pixelScale - 1)
             }
-            bitStartElem.innerText = String(bit.start)
-            bitEndElem.innerText = String(bit.end)
+            bitStart.innerText = String(bit.start)
+            bitEnd.innerText = String(bit.end)
             timeStart.innerText = parse_time(time.start)
             timeEnd.innerText = parse_time(time.end)
             submitA.href = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_offset=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
@@ -190,18 +191,25 @@
             const timeWrapper = document.querySelector('.label-time-wrapper')
             const imgWidth = img.width
             let html = '';
-            let time = time_offset;
+            let time = time_start;
 
             if (imgWidth === 0) {
                 setTimeout(add_time_label)
                 return
             }
 
-            while ((time - time_offset) / 100 * 5 < imgWidth) {
+            while ((time - time_start) / 100 * 5 < imgWidth) {
                 html += `<span class="label-time">${parse_time(time)}</span>`
                 time += 2000
             }
             timeWrapper.innerHTML = html
+        })();
+
+        (function show_output_labels () {
+            bitStart.innerText = String(bit_start)
+            bitEnd.innerText = String(bit_end)
+            timeStart.innerText = parse_time(time_start)
+            timeEnd.innerText = parse_time(time_end)
         })()
     </script>
 </body>
