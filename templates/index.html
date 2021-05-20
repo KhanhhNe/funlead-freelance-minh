@@ -111,6 +111,11 @@
 
         function compute_output() {
             let { top, left, bottom, right } = selection.getClientRects()[0]
+            left += window.scrollX
+            right += window.scrollX
+            top += window.scrollY
+            bottom += window.scrollY
+
             let bit = {
                 start: Math.trunc(top / pixelScale),
                 end: Math.trunc(bottom / pixelScale - 1)
