@@ -1,10 +1,185 @@
 <!DOCTYPE html>
-<html>
+<html lang="">
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: scroll;
+        }
+        .img-display, .label-time-wrapper {display: flex;}
+        .input-img {height: {{ 16 * pixel_scale }}px;}
+        .pixel, .selection {
+            position: absolute;
+            z-index: 1;
+        }
+        .pixel {
+            height: {{ pixel_scale }}px !important;
+            width: {{ pixel_scale }}px !important;
+            display: block;
+        }
+        .selection {background-color: rgba(0, 255, 0, 0.2);}
+        .label-bit-wrapper {
+            position: absolute;
+            width: 50px;
+            color: red;
+            text-shadow: 1px 1px 2px black;
+            z-index: 2;
+        }
+        .label-bit {
+            margin-bottom: 40px;
+            line-height: 10px;
+            font-size: 15px;
+        }
+        .label-bit:last-child {margin-bottom: 0;}
+        .label-bit::after {content: " -"}
+        .label-time {
+            display: inline-table;
+            width: 100px;
+            margin-top: 10px;
+        }
+        .label-time::before {
+            content: "-";
+            position: absolute;
+            transform: rotate(90deg) translate(-28px, -4px);
+            color: red;
+            text-shadow: 1px 1px 3px black;
+            font-size: 40px;
+        }
+        img {
+            image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+            image-rendering: -moz-crisp-edges;          /* Firefox                        */
+            image-rendering: -o-crisp-edges;            /* Opera                          */
+            image-rendering: pixelated; /* Chrome */
+            -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+        }
+    </style>
+    <title>Tool</title>
+</head>
 <body>
-    <form action method="post">
-        <span>Hyper spectra data location: </span><input type="file" name="location"><br />
-        <span>Weight data: </span><input type="file" name="weight"><br />
-        <input type="submit" value="Submit">
-    </form>
+    <div class="img-container">
+        <div class="pixel" id="mouse"></div>
+        <div class="pixel" id="mouse2"></div>
+        <div class="selection" id="selection"></div>
+        <div class="label-bit-wrapper">
+            <div class="label-bit">0</div>
+            <div class="label-bit">5</div>
+            <div class="label-bit">10</div>
+            <div class="label-bit">15</div>
+        </div>
+        <div class="img-display">
+            {% for img in imgs %}
+                <img src="{{ img }}" class="input-img" style="display: inline" alt="">
+            {% endfor %}
+            <br />
+        </div>
+    </div>
+    <div class="label-time-wrapper"></div>
+    <div class="output">
+        Bit range: <span id="bit-start"></span> - <span id="bit-end"></span><br/>
+        Time: <span id="time-start"></span> - <span id="time-end"></span>
+    </div>
+    <script>
+        const time_offset = {{ time_offset }}
+        const pixelScale = {{ pixel_scale }}
+        const img = document.querySelector('.input-img')
+        const imgContainer = document.querySelector('.img-container')
+        const div1 = document.getElementById('mouse')
+        const div2 = document.getElementById('mouse2')
+        const selection = document.getElementById('selection')
+        const bitStart = document.getElementById('bit-start')
+        const bitEnd = document.getElementById('bit-end')
+        const timeStart = document.getElementById('time-start')
+        const timeEnd = document.getElementById('time-end')
+        let selecting = false;
+
+        function set_pixel_pos(div, event) {
+            const clientX = event.clientX + window.scrollX
+            const clientY = event.clientY + window.scrollY
+            div.style.left = `${clientX - (clientX % pixelScale)}px`
+            div.style.top = `${Math.min(clientY - (clientY % pixelScale), 15 * pixelScale)}px`
+        }
+
+        function parse_time(millisecond) {
+            const hour = Math.trunc(millisecond / (60 ** 2) / 1000)
+            millisecond %= 60 ** 2 * 1000
+            const min = Math.trunc(millisecond / 60 / 1000)
+            millisecond %= 60 * 1000
+            const sec = Math.trunc(millisecond / 1000)
+            return `${hour}:${min}:${sec}`
+        }
+
+        function compute_output() {
+            let { top, left, bottom, right } = selection.getClientRects()[0]
+            let bit = {
+                start: Math.trunc(top / pixelScale),
+                end: Math.trunc(bottom / pixelScale - 1)
+            }
+            let time = {
+                start: time_offset + 200 * Math.trunc(left / pixelScale),
+                end: time_offset + 200 * Math.trunc(right / pixelScale - 1)
+            }
+            bitStart.innerText = String(bit.start)
+            bitEnd.innerText = String(bit.end)
+            timeStart.innerText = parse_time(time.start)
+            timeEnd.innerText = parse_time(time.end)
+        }
+
+        document.onclick = function (e) {
+            if (imgContainer !== e.target && !imgContainer.contains(e.target)) {
+                return
+            }
+            if (!selecting) {
+                set_pixel_pos(div1, e)
+                selection.style.width = '0px'
+            } else {
+                set_pixel_pos(div2, e)
+                show_selection()
+                compute_output()
+            }
+            selecting = !selecting
+        }
+
+        document.onmousemove = function (e) {
+            if (selecting) {
+                set_pixel_pos(div2, e)
+                show_selection()
+            }
+        }
+        document.onscroll = function () {
+            document.querySelector('.label-bit-wrapper').style.left = window.scrollX + 'px'
+        }
+
+        function show_selection () {
+            let top1 = parseInt(div1.style.top);
+            let top2 = parseInt(div2.style.top);
+            if (top1 > top2) {
+                [top1, top2] = [top2, top1]
+            }
+            let left1 = parseInt(div1.style.left);
+            let left2 = parseInt(div2.style.left);
+            if (left1 > left2) {
+                [left1, left2] = [left2, left1]
+            }
+            selection.style.top = `${top1}px`
+            selection.style.left = `${left1}px`
+
+            selection.style.height = `${top2 - top1 + pixelScale}px`
+            selection.style.width = `${left2 - left1 + pixelScale}px`
+        }
+
+        (function () {
+            const timeWrapper = document.querySelector('.label-time-wrapper')
+            const imgWidth = img.width
+            let html = '';
+            let time = time_offset;
+
+            while ((time - time_offset) / 1000 * 5 < imgWidth) {
+                html += `<span class="label-time">${parse_time(time)}</span>`
+                time += 2000
+            }
+            timeWrapper.innerHTML = html
+        })()
+    </script>
 </body>
 </html>
