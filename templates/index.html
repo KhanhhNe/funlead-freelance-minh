@@ -141,7 +141,7 @@
             bitEnd.innerText = String(bit.end)
             timeStart.innerText = parse_time(time.start)
             timeEnd.innerText = parse_time(time.end)
-            submitA.href = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_offset=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
+            submitA.href = `/select?bit_start=${bit.start}&bit_end=${bit.end}&time_offset=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
         }
 
         document.onclick = function (e) {

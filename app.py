@@ -1,14 +1,32 @@
 import os
 import re
 
-from flask import Flask, render_template, send_from_directory, request
+from PIL import Image
+from flask import Flask, render_template, send_from_directory, request, url_for, redirect
+
+import funlead
 
 app = Flask(__name__)
 
 
-@app.route('/')
-def main_route():
-    img = [os.path.join('imgs', filename) for filename in os.listdir('imgs') if 'labelled' not in filename][0]
+@app.route('/', methods=['GET', 'POST'])
+def input_files():
+    if request.method == 'GET':
+        return render_template('input-files.html')
+    else:
+        csv_file = request.files['csv']
+        csv_file.save('data.csv')
+        weight_file = request.files['weight']
+        weight_file.save('weight.csv')
+        data_array = funlead.performPCA('data.csv', 'weight.csv')[0]
+        img2 = Image.fromarray(data_array)
+        img2.save(f'imgs/calculated.png')
+        return redirect(url_for('select_route'))
+
+
+@app.route('/select')
+def select_route():
+    img = 'imgs/calculated.png'
     if request.args.get('time_offset'):
         time_start_str = request.args['time_offset']
     else:
