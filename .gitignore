@@ -141,4 +141,5 @@ cython_debug/
 .idea
 
 # Data
-FLT7_dc_20210108.csv
+*.csv
+imgs/
