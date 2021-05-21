@@ -118,7 +118,8 @@
             const min = Math.trunc(millisecond / 60 / 1000)
             millisecond %= 60 * 1000
             const sec = Math.trunc(millisecond / 1000)
-            return `${hour}:${min}:${sec}`
+            millisecond %= 1000
+            return `${hour}:${min}:${sec}.${String(millisecond).padEnd(3, '0')}`
         }
 
         function compute_output() {
@@ -197,6 +198,10 @@
                 setTimeout(add_time_label)
                 return
             }
+
+            const offset = 1000 - time % 1000
+            html += `<div style="height: ${pixelScale}px; width: ${offset / 200 * pixelScale}px; display: inline-table "></div>`
+            time += offset
 
             while ((time - time_start) / 100 * 5 < imgWidth) {
                 html += `<span class="label-time">${parse_time(time)}</span>`

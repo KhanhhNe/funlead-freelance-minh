@@ -1,4 +1,5 @@
 import os
+import re
 
 from flask import Flask, render_template, send_from_directory, request
 
@@ -11,7 +12,7 @@ def main_route():
     if request.args.get('time_offset'):
         time_start_str = request.args['time_offset']
     else:
-        time_start_str = '14:16:04'
+        time_start_str = '14:16:04.000'
     time_end_str = request.args.get('time_end', time_start_str)
 
     time_start = parse_time_str(time_start_str)
@@ -30,8 +31,8 @@ def main_route():
 
 
 def parse_time_str(time_str):
-    hours, minutes, secs = map(int, time_str.split(':'))
-    return sum([hours * 60 ** 2, minutes * 60, secs]) * 1000
+    hours, minutes, secs, millis = map(int, re.split(r':|\.', time_str))
+    return sum([hours * 60 ** 2, minutes * 60, secs]) * 1000 + millis
 
 
 @app.route('/imgs/<path:filename>')
