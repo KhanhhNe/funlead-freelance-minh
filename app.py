@@ -18,29 +18,32 @@ def input_files():
         csv_file.save('data.csv')
         weight_file = request.files['weight']
         weight_file.save('weight.csv')
-        data_array = funlead.performPCA('data.csv', 'weight.csv')[0]
+        data_array, start_time, end_time = funlead.performPCA('data.csv', 'weight.csv')
         img2 = Image.fromarray(data_array)
-        img2.save(f'imgs/calculated.png')
+        img2.save('static/imgs/default.png')
+        open('time.txt', 'w+').write(start_time + '\n' + end_time)
+
         return redirect(url_for('select_route'))
 
 
 @app.route('/select')
 def select_route():
-    img = 'imgs/calculated.png'
+    time_start_str, time_end_str = open('time.txt').read().splitlines()
     if request.args.get('time_offset'):
         time_start_str = request.args['time_offset']
-    else:
-        time_start_str = '14:16:04.000'
-    time_end_str = request.args.get('time_end', time_start_str)
+    if request.args.get('time_end'):
+        time_end_str = request.args['time_end']
 
     time_start = parse_time_str(time_start_str)
     time_end = parse_time_str(time_end_str)
-
     bit_start = int(request.args.get('bit_start', '0'))
     bit_end = int(request.args.get('bit_end', '15'))
 
+    img = '/static/imgs/default.png'
+    w, h = Image.open(img.lstrip('/')).size
+
     return render_template(
-        'index.html', img=img, pixel_scale=10,
+        'index.html', img=img, img_width=w, img_height=h, pixel_scale=10,
         bit_start=bit_start,
         bit_end=bit_end,
         time_start=time_start,
@@ -49,13 +52,20 @@ def select_route():
 
 
 def parse_time_str(time_str):
-    hours, minutes, secs, millis = map(int, re.split(r':|\.', time_str))
-    return sum([hours * 60 ** 2, minutes * 60, secs]) * 1000 + millis
+    time_info, millis = re.split(r'\.', time_str) + ['0']
+    return f"Date.parse('{time_info}').addMilliseconds({millis})"
 
 
-@app.route('/imgs/<path:filename>')
-def get_img(filename):
-    return send_from_directory('imgs', filename)
+@app.route('/static/<path:pathname>')
+def get_asset(pathname):
+    return send_from_directory('static', pathname)
+
+
+@app.after_request
+def disable_caching(response):
+    response.cache_control.no_store = True
+    response.cache_control.max_age = 0
+    return response
 
 
 if __name__ == '__main__':

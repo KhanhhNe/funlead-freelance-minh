@@ -142,4 +142,5 @@ cython_debug/
 
 # Data
 *.csv
-imgs/
+*.txt
+static/imgs/*

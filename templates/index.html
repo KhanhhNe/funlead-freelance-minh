@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="">
 <head>
-    {% set height = bit_end - bit_start + 1 %}
     <style>
         body {
             margin: 0;
@@ -12,7 +11,8 @@
             display: flex;
         }
         .input-img {
-            height: {{ height * pixel_scale }}px;
+            height: {{ img_height * pixel_scale }}px;
+            width: {{ img_width * pixel_scale }}px;
         }
         .pixel, .selection {
             position: absolute;
@@ -86,13 +86,15 @@
         Time: <span id="time-start"></span> - <span id="time-end"></span><br/>
         <a href="#" id="submit-link">Submit</a>
     </div>
+
+    <script src="/static/js/date.js"></script>
     <script>
-        const time_start = {{ time_start }}
-        const time_end = {{ time_end }}
+        const time_start = {{ time_start|safe }}
+        const time_end = {{ time_end|safe }}
         const pixelScale = {{ pixel_scale }}
         const bit_start = {{ bit_start }}
         const bit_end = {{ bit_end }}
-        const bitRange = {{ height }}
+        const bitRange = bit_end - bit_start
         const img = document.querySelector('.input-img')
         const imgContainer = document.querySelector('.img-container')
         const div1 = document.getElementById('mouse')
@@ -109,17 +111,11 @@
             const clientX = event.clientX + window.scrollX
             const clientY = event.clientY + window.scrollY
             div.style.left = `${clientX - (clientX % pixelScale)}px`
-            div.style.top = `${Math.min(clientY - (clientY % pixelScale), (bitRange - 1) * pixelScale)}px`
+            div.style.top = `${Math.min(clientY - (clientY % pixelScale), (bitRange) * pixelScale)}px`
         }
 
-        function parse_time(millisecond) {
-            const hour = Math.trunc(millisecond / (60 ** 2) / 1000)
-            millisecond %= 60 ** 2 * 1000
-            const min = Math.trunc(millisecond / 60 / 1000)
-            millisecond %= 60 * 1000
-            const sec = Math.trunc(millisecond / 1000)
-            millisecond %= 1000
-            return `${hour}:${min}:${sec}.${String(millisecond).padEnd(3, '0')}`
+        function parse_time(time) {
+            return (`${time.toString('u')}.${time.getMilliseconds()}`).replace('Z', '')
         }
 
         function compute_output() {
@@ -134,14 +130,14 @@
                 end: Math.trunc(bottom / pixelScale - 1)
             }
             let time = {
-                start: time_start + 200 * Math.trunc(left / pixelScale),
-                end: time_start + 200 * Math.trunc(right / pixelScale - 1)
+                start: time_start.addMilliseconds(200 * left / pixelScale),
+                end: time_start.addMilliseconds(200 * right / pixelScale - 1)
             }
             bitStart.innerText = String(bit.start)
             bitEnd.innerText = String(bit.end)
             timeStart.innerText = parse_time(time.start)
             timeEnd.innerText = parse_time(time.end)
-            submitA.href = `/select?bit_start=${bit.start}&bit_end=${bit.end}&time_offset=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
+            submitA.href = `/select?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
         }
 
         document.onclick = function (e) {
