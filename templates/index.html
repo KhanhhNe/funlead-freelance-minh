@@ -95,6 +95,7 @@
         const bit_start = {{ bit_start }}
         const bit_end = {{ bit_end }}
         const bitRange = bit_end - bit_start
+        const timeRange = {{ img_width }}
         const img = document.querySelector('.input-img')
         const imgContainer = document.querySelector('.img-container')
         const div1 = document.getElementById('mouse')
@@ -110,12 +111,17 @@
         function set_pixel_pos(div, event) {
             const clientX = event.clientX + window.scrollX
             const clientY = event.clientY + window.scrollY
-            div.style.left = `${clientX - (clientX % pixelScale)}px`
+            div.style.left = `${Math.min(clientX - (clientX % pixelScale), ((timeRange - 1) * pixelScale))}px`
             div.style.top = `${Math.min(clientY - (clientY % pixelScale), (bitRange) * pixelScale)}px`
         }
 
         function parse_time(time) {
-            return (`${time.toString('u')}.${time.getMilliseconds()}`).replace('Z', '')
+            let roundedMillis = time.getMilliseconds()
+            if (time.getMilliseconds() % 100) {
+                roundedMillis = (time.getMilliseconds() + 100 - time.getMilliseconds() % 100) % 1000
+            }
+            return (`${time.toString('u')}.${String(roundedMillis).padEnd(3, '0')}`)
+                .replace('Z', '')
         }
 
         function compute_output() {
@@ -126,12 +132,12 @@
             bottom += window.scrollY
 
             let bit = {
-                start: Math.trunc(top / pixelScale),
-                end: Math.trunc(bottom / pixelScale - 1)
+                start: bit_start + Math.trunc(top / pixelScale),
+                end: bit_start + Math.trunc(bottom / pixelScale - 1)
             }
             let time = {
-                start: time_start.addMilliseconds(200 * left / pixelScale),
-                end: time_start.addMilliseconds(200 * right / pixelScale - 1)
+                start: new Date(time_start).addMilliseconds(200 * left / pixelScale),
+                end: new Date(time_start).addMilliseconds(200 * right / pixelScale - 1)
             }
             bitStart.innerText = String(bit.start)
             bitEnd.innerText = String(bit.end)
@@ -187,21 +193,28 @@
         (function add_time_label() {
             const timeWrapper = document.querySelector('.label-time-wrapper')
             const imgWidth = img.width
-            let html = '';
-            let time = time_start;
+            let html = ''
+            let time = time_start
+            let totalWidth = 0
 
             if (imgWidth === 0) {
                 setTimeout(add_time_label)
                 return
             }
 
-            const offset = 1000 - time % 1000
-            html += `<div style="height: ${pixelScale}px; width: ${offset / 200 * pixelScale}px; display: inline-table "></div>`
-            time += offset
+            if (time.getMilliseconds()) {
+                const offset_millis = 1000 - time.getMilliseconds() % 1000;
+                const offset_width = offset_millis / 200 * pixelScale
+                html += `<div style="height: ${pixelScale}px; width: ${offset_width}px; display: inline-table"></div>`
+                time.addMilliseconds(offset_millis)
+                totalWidth += offset_width
+                console.log({offset_millis, offset_width})
+            }
 
-            while ((time - time_start) / 100 * 5 < imgWidth) {
-                html += `<span class="label-time">${parse_time(time)}</span>`
-                time += 2000
+            while (totalWidth < imgWidth) {
+                html += `<span class="label-time">${parse_time(time).split(/ |\./g)[1]}</span>`
+                time.addSeconds(2)
+                totalWidth += 10 * pixelScale
             }
             timeWrapper.innerHTML = html
         })();
