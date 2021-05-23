@@ -136,8 +136,8 @@
                 end: bit_start + Math.trunc(bottom / pixelScale - 1)
             }
             let time = {
-                start: new Date(time_start).addMilliseconds(200 * left / pixelScale),
-                end: new Date(time_start).addMilliseconds(200 * right / pixelScale - 1)
+                start: (new Date(time_start)).addMilliseconds(1000 / 5 * left / pixelScale),
+                end: (new Date(time_start)).addMilliseconds(1000 / 5 * (right / pixelScale - 1))
             }
             bitStart.innerText = String(bit.start)
             bitEnd.innerText = String(bit.end)
@@ -194,7 +194,7 @@
             const timeWrapper = document.querySelector('.label-time-wrapper')
             const imgWidth = img.width
             let html = ''
-            let time = time_start
+            let time = new Date(time_start)
             let totalWidth = 0
 
             if (imgWidth === 0) {
