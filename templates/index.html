@@ -84,7 +84,14 @@
     <div class="output">
         Bit range: <span id="bit-start"></span> - <span id="bit-end"></span><br/>
         Time: <span id="time-start"></span> - <span id="time-end"></span><br/>
-        <a href="#" id="submit-link">Submit</a>
+        <a href="#" id="submit-link">Submit Selection</a><br/>
+        <a href="/">Reset</a><br/><br/><br/>
+        <p>CSV input</p>
+        <form method="post" enctype="multipart/form-data">
+            <span>Hyper spectra data location: </span><input type="file" name="csv"><br/>
+            <span>Weight data: </span><input type="file" name="weight"><br/>
+            <input type="submit">
+        </form>
     </div>
 
     <script src="/static/js/date.js"></script>
@@ -143,7 +150,7 @@
             bitEnd.innerText = String(bit.end)
             timeStart.innerText = parse_time(time.start)
             timeEnd.innerText = parse_time(time.end)
-            submitA.href = `/select?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
+            submitA.href = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
         }
 
         document.onclick = function (e) {
