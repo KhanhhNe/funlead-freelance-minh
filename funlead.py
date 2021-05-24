@@ -7,7 +7,7 @@ from PIL import Image
 from sklearn.preprocessing import MaxAbsScaler
 
 #
-def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, bitend=15, bandstart=13, bandend=115,vidnum=1):
+def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, bitend=15, bandstart=13, bandend=220,vidnum=1):
     # config for which dimensions to start and end for, this value can be narrowed.
     # 13 is the minimum starting point
     # if from dimension 5 is required, add 5 to the START param
@@ -16,8 +16,15 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
 
     df_orig = pd.read_csv(csvfile, header=None)
 
+    df_weight = pd.read_csv(weightsfile, header=None)
+
     # remove the dimensions we want to cut
     df_cut = df_orig.loc[:, START:END]
+    df_weights_cut = df_weight.loc[:, START:END]
+
+    for index, value in enumerate(df_weights_cut.values[0]):
+        # print(index)
+        df_cut[START + index] = df_cut[START + index] * value
 
     # construct PCA
     pca = PCA(n_components=3)
@@ -50,6 +57,11 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
         #TODO get the end time
         end_time = df_scaled.iloc[len(df_scaled)-1].name.strftime('%Y-%m-%d %H:%M:%S')
         # end_time = "2020-01-15 14:20:00"
+    else:
+        #populate the date with the times
+        date = df_scaled.iloc[0].name.strftime('%Y-%m-%d')
+        start_time=date +" " + start_time
+        end_time = date +" " + end_time
 
     df_scaled_temp = df_scaled.loc[start_time: end_time]
 
