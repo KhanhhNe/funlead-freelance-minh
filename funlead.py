@@ -106,7 +106,7 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
     position = 0
     # this will be the label for the time
     timelabel = df_scaled_temp.iloc[0].name.strftime('%H:%M:%S')
-
+    firstlabel = 0
     for i in range(0, len(df_scaled_temp), 16):
         # print(i)
         # print(t)
@@ -128,7 +128,13 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
             if timelabel != timelabel2:
                 # print(f'timelable 1 {timelabel} timelabel{timelabel2}')
                 # print(timelabel2)
-                x_pos.append(math.ceil(position / 16))
+                if firstlabel == 0:
+                    firstlabel = math.ceil(position / 16)
+                    x_pos.append(firstlabel)
+                else:
+                    firstlabel +=4
+                    x_pos.append(firstlabel)
+
                 x_labels.append(timelabel2)
                 timelabel = timelabel2
         t += 1
@@ -143,7 +149,7 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
     # img2 = Image.fromarray(array2)
     # img2.save(f'{vidnum}.png')
     #
-    # # create figure with labels
+    # create figure with labels
     # fig, ax = plt.subplots(1, 1)
     # ax.set_xticklabels(x_labels)
     # ax.set_xticks(x_pos)
@@ -152,8 +158,11 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
     #
     # fig.set_size_inches(100, 3.2)
     # fig.savefig(f'labelled-{vidnum}.png', dpi=100)
+    print('\t'.join(x_labels))
+    print(''.join(map(lambda p: str(p).ljust(12), x_pos)))
 
     array2 = array2[bitstart:bitend+1,:,:]
+
     return array2, x_labels, x_pos, start_time+"."+str(starttimemicroseconds), end_time+"."+str(endtimemicroseconds)
 
 
