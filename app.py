@@ -1,9 +1,6 @@
 import os
 import re
 import time
-from datetime import timedelta
-
-from dateutil import parser
 
 from PIL import Image
 from flask import Flask, render_template, send_from_directory, request, url_for, redirect
@@ -42,6 +39,10 @@ def select_route():
         time_end = parse_time_str(end_time)
 
         w, h = Image.open(img_name.lstrip('/')).size
+        # img_name = 'static/imgs/default_img.png'
+        # w, h = (5406, 16)
+        # time_start = time_start_str
+        # time_end = time_end_str
 
         return render_template(
             'index.html', img=img_name, img_width=w, img_height=h, pixel_scale=10,
