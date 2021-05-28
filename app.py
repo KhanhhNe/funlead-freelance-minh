@@ -85,3 +85,6 @@ def disable_caching(response):
 
 if __name__ == '__main__':
     app.run(debug=True)
+    # Uncomment bellow lines and change port to an open port on machine to deploy on VPS
+    # port = 8000
+    # app.run('0.0.0.0', port)
