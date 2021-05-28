@@ -5,7 +5,12 @@ import numpy as np
 from sklearn.decomposition import PCA
 from PIL import Image
 from sklearn.preprocessing import MaxAbsScaler
+from datetime import datetime
+import math
 
+#
+
+# start time must be in format 14:50:20.1
 #
 def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, bitend=15, bandstart=13, bandend=220,vidnum=1):
     # config for which dimensions to start and end for, this value can be narrowed.
@@ -49,7 +54,8 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
     # vidNumber = item['vidNumber']
 
     #if start_time == 0 then get the default start and end time of the whole datafram
-
+    starttimemicroseconds = 0
+    endtimemicroseconds = 0
     if start_time == 0:
         #TODO get the first start time
         start_time = df_scaled.iloc[0].name.strftime('%Y-%m-%d %H:%M:%S')
@@ -60,11 +66,25 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
     else:
         #populate the date with the times
         date = df_scaled.iloc[0].name.strftime('%Y-%m-%d')
-        start_time=date +" " + start_time
-        end_time = date +" " + end_time
+
+        #remove the decimal from start time and endtime
+        start_time, starttimemicroseconds = start_time.split(".",1)
+        end_time, endtimemicroseconds = end_time.split(".",1)
+        starttimemicroseconds = int(starttimemicroseconds)
+        endtimemicroseconds = int(endtimemicroseconds)
+
+        start_time = date +" " + start_time
+        end_time = date + " " + end_time
 
     df_scaled_temp = df_scaled.loc[start_time: end_time]
 
+    if starttimemicroseconds > 0 :
+        #get the first row
+        firstrow = int(64*(starttimemicroseconds/10))
+        lastrow =int(len(df_scaled_temp) - (64/(endtimemicroseconds/10)))
+
+        #cut the dataframe again:
+        df_scaled_temp = df_scaled_temp.iloc[firstrow: lastrow]
     # get the first 0 index so we can know which is the first sensor
 
     firstindex = 0
@@ -83,9 +103,13 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
     # for labels
     x_pos = []
     x_labels = []
+    position = 0
+    # this will be the label for the time
+    timelabel = df_scaled_temp.iloc[0].name.strftime('%H:%M:%S')
 
     for i in range(0, len(df_scaled_temp), 16):
-
+        # print(i)
+        # print(t)
         columns = []
         position = i
         for j in range(0, 16):
@@ -97,31 +121,41 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
             if len(rgb) > 0:
                 array2[j, t] = rgb
                 position += 1
+
+            if position<len(df_scaled_temp):
+                timelabel2 = df_scaled_temp.iloc[position].name.strftime('%H:%M:%S')
+
+            if timelabel != timelabel2:
+                # print(f'timelable 1 {timelabel} timelabel{timelabel2}')
+                # print(timelabel2)
+                x_pos.append(round(position / 16))
+                x_labels.append(timelabel2)
+                timelabel = timelabel2
         t += 1
 
-        # every 160 rows we label
-        temp = i / 16
-        if temp % 10 == 0:
-            x_pos.append(temp)
-            x_labels.append(df_scaled_temp.iloc[i].name.strftime('%H:%M:%S'))
+        # # every 160 rows we label
+        # temp = i / 16
+        # if temp % 4 == 0:
+        #     x_pos.append(temp)
+        #     x_labels.append(df_scaled_temp.iloc[i].name.strftime('%H:%M:%S'))
 
     # # create the image without labels
     # img2 = Image.fromarray(array2)
     # img2.save(f'{vidnum}.png')
     #
-    # # create figure with labels
-    # fig, ax = plt.subplots(1, 1)
-    # ax.set_xticklabels(x_labels)
-    # ax.set_xticks(x_pos)
-    # ax.imshow(array2)
-    #
-    #
-    # fig.set_size_inches(100, 3.2)
-    # fig.savefig(f'labelled-{vidnum}.png', dpi=100)
+    # create figure with labels
+    fig, ax = plt.subplots(1, 1)
+    ax.set_xticklabels(x_labels)
+    ax.set_xticks(x_pos)
+    ax.imshow(array2)
+
+
+    fig.set_size_inches(100, 3.2)
+    fig.savefig(f'labelled-{vidnum}.png', dpi=100)
 
     array2 = array2[bitstart:bitend+1,:,:]
     # ylabels = []
-    return array2, start_time, end_time
+    return array2, f'{start_time}.{starttimemicroseconds}', f'{end_time}.{endtimemicroseconds}'
 
 
 

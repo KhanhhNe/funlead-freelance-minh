@@ -1,3 +1,4 @@
+import os
 import re
 import time
 from datetime import timedelta
@@ -15,18 +16,14 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def select_route():
     if request.method == 'GET':
+        if not os.path.exists('data.csv') or not os.path.exists('weight.csv'):
+            return render_template('select.html')
+
         time_start_str, time_end_str = 0, 0
         if request.args.get('time_start'):
-            time_start_str = request.args['time_start']
+            time_start_str = request.args['time_start'].removesuffix('00').split()[1]
         if request.args.get('time_end'):
-            time_end_str = request.args['time_end']
-
-        if time_start_str:
-            time_start_str = parser.parse(time_start_str).strftime('%Y-%m-%d %H:%M:%S')
-            time_end_obj = parser.parse(time_end_str)
-            if time_end_obj.microsecond:
-                time_end_obj += timedelta(seconds=1)
-            time_end_str = time_end_obj.strftime('%Y-%m-%d %H:%M:%S')
+            time_end_str = request.args['time_end'].removesuffix('00').split()[1]
 
         bit_start = int(request.args.get('bit_start', '0'))
         bit_end = int(request.args.get('bit_end', '15'))
@@ -63,8 +60,9 @@ def select_route():
 
 
 def parse_time_str(time_str):
-    time_info, millis = re.split(r'\.', time_str) + ['0']
-    return f"Date.parse('{time_info}').addMilliseconds({millis})"
+    time_info, millis, *_ = re.split(r'\.', time_str) + ['0']
+    # Multiply with 100 since time str `00` suffix removed above
+    return f"Date.parse('{time_info}').addMilliseconds({int(millis) * 100})"
 
 
 @app.route('/static/<path:pathname>')

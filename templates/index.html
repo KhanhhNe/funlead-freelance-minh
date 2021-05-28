@@ -41,7 +41,6 @@
         .label-bit::after {content: " -"}
         .label-time {
             display: inline-table;
-            width: {{ 10 * pixel_scale }}px;
             margin-top: {{ pixel_scale }}px;
         }
         .label-time::before {
@@ -103,6 +102,7 @@
         const bit_end = {{ bit_end }}
         const bitRange = bit_end - bit_start
         const timeRange = {{ img_width }}
+        const pixelsPerSecond = 4
         const img = document.querySelector('.input-img')
         const imgContainer = document.querySelector('.img-container')
         const div1 = document.getElementById('mouse')
@@ -143,8 +143,8 @@
                 end: bit_start + Math.trunc(bottom / pixelScale - 1)
             }
             let time = {
-                start: (new Date(time_start)).addMilliseconds(1000 / 5 * left / pixelScale),
-                end: (new Date(time_start)).addMilliseconds(1000 / 5 * (right / pixelScale - 1))
+                start: (new Date(time_start)).addMilliseconds(left / pixelScale / pixelsPerSecond * 1000),
+                end: (new Date(time_start)).addMilliseconds((right / pixelScale - 1) / pixelsPerSecond * 1000)
             }
             bitStart.innerText = String(bit.start)
             bitEnd.innerText = String(bit.end)
@@ -211,17 +211,16 @@
 
             if (time.getMilliseconds()) {
                 const offset_millis = 1000 - time.getMilliseconds() % 1000;
-                const offset_width = offset_millis / 200 * pixelScale
+                const offset_width = offset_millis / 1000 * pixelsPerSecond * pixelScale
                 html += `<div style="height: ${pixelScale}px; width: ${offset_width}px; display: inline-table"></div>`
                 time.addMilliseconds(offset_millis)
                 totalWidth += offset_width
-                console.log({offset_millis, offset_width})
             }
 
             while (totalWidth < imgWidth) {
-                html += `<span class="label-time">${parse_time(time).split(/ |\./g)[1]}</span>`
+                html += `<span class="label-time" style="width: ${2*pixelsPerSecond*pixelScale}px">${parse_time(time).split(/ |\./g)[1]}</span>`
                 time.addSeconds(2)
-                totalWidth += 10 * pixelScale
+                totalWidth += pixelsPerSecond * 2 * pixelScale
             }
             timeWrapper.innerHTML = html
         })();
