@@ -28,7 +28,7 @@ def select_route():
         bit_start = int(request.args.get('bit_start', '0'))
         bit_end = int(request.args.get('bit_end', '15'))
 
-        data_array, start_time, end_time = funlead.performPCA(
+        data_array, _, _, start_time, end_time = funlead.performPCA(
             'data.csv', 'weight.csv',
             start_time=time_start_str, end_time=time_end_str,
             bitstart=bit_start, bitend=bit_end
