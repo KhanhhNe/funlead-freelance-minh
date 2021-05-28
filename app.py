@@ -51,10 +51,12 @@ def select_route():
             time_end=time_end
         )
     else:
-        csv_file = request.files['csv']
-        csv_file.save('data.csv')
-        weight_file = request.files['weight']
-        weight_file.save('weight.csv')
+        if request.files.get('csv'):
+            csv_file = request.files['csv']
+            csv_file.save('data.csv')
+        if request.files.get('weight'):
+            weight_file = request.files['weight']
+            weight_file.save('weight.csv')
 
         return redirect(url_for('select_route'))
 
