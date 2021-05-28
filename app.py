@@ -59,7 +59,10 @@ def select_route():
             weight_file = request.files['weight']
             weight_file.save('weight.csv')
 
-        return redirect(url_for('select_route'))
+        if not request.files.get('csv'):
+            return redirect(url_for('select_route', **request.args))
+        else:
+            return redirect(url_for('select_route'))
 
 
 def parse_time_str(time_str):
