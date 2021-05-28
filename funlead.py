@@ -144,14 +144,14 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
     # img2.save(f'{vidnum}.png')
     #
     # create figure with labels
-    fig, ax = plt.subplots(1, 1)
-    ax.set_xticklabels(x_labels)
-    ax.set_xticks(x_pos)
-    ax.imshow(array2)
-
-
-    fig.set_size_inches(100, 3.2)
-    fig.savefig(f'labelled-{vidnum}.png', dpi=100)
+    # fig, ax = plt.subplots(1, 1)
+    # ax.set_xticklabels(x_labels)
+    # ax.set_xticks(x_pos)
+    # ax.imshow(array2)
+    #
+    #
+    # fig.set_size_inches(100, 3.2)
+    # fig.savefig(f'labelled-{vidnum}.png', dpi=100)
 
     array2 = array2[bitstart:bitend+1,:,:]
     # ylabels = []
