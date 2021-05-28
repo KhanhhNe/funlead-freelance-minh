@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="">
 <head>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow-x: scroll;
         }
-        .img-display, .label-time-wrapper {
-            display: flex;
+        .img-display {
+            width: 100vw;
+            overflow-x: scroll;
+            position: relative;
         }
         .input-img {
             height: {{ img_height * pixel_scale }}px;
@@ -27,7 +30,7 @@
         .label-bit-wrapper {
             position: absolute;
             width: {{ 5 * pixel_scale }}px;
-            color: red;
+            color: white;
             text-shadow: 1px 1px 2px black;
             z-index: 2;
             user-select: none;
@@ -39,21 +42,21 @@
         }
         .label-bit:last-child {margin-bottom: 0;}
         .label-bit::after {content: " -"}
+        .label-time-wrapper {
+            display: flex;
+        }
         .label-time {
             display: inline-table;
-            margin-top: {{ pixel_scale }}px;
         }
         .label-time::before {
             content: "-";
-            position: absolute;
-            transform: rotate(90deg) translate(-28px, -4px);
+            display: block;
+            position: relative;
+            transform: rotate(90deg) translate(30px, 30px);
             color: red;
             text-shadow: 1px 1px 3px black;
-            font-size: {{ 4 * pixel_scale }}px;
-        }
-        .output {
-            width: 50vw;
-            position: absolute;
+            font-size: 40px;
+            line-height: 10px;
         }
         img {
             image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
@@ -67,6 +70,7 @@
 </head>
 <body>
     <div class="img-container">
+        <div class="img-display">
         <div class="pixel" id="mouse"></div>
         <div class="pixel" id="mouse2"></div>
         <div class="selection" id="selection"></div>
@@ -75,24 +79,45 @@
             <div class="label-bit">{{ val }}</div>
             {% endfor %}
         </div>
-        <div class="img-display">
             <img src="{{ img }}" class="input-img" style="display: inline" alt="">
+            <div class="label-time-wrapper"></div>
         </div>
     </div>
-    <div class="label-time-wrapper"></div>
-    <div class="output">
-        Bit range: <span id="bit-start"></span> - <span id="bit-end"></span><br/>
-        Time: <span id="time-start"></span> - <span id="time-end"></span><br/>
-        <a href="#" target="_blank" id="submit-link">Submit Selection</a><br/>
-        <a href="/">Reset</a><br/><br/><br/>
-        <p>CSV input</p>
-        <form method="post" enctype="multipart/form-data">
-            <span>Hyper spectra data location: </span><input type="file" name="csv"><br/>
-            <span>Weight data: </span><input type="file" name="weight"><br/>
-            <input type="submit">
-        </form>
+    <div class="container-fluid p-5">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">User input</h4>
+                <form name="main" method="post" enctype="multipart/form-data">
+                    <p class="card-text">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroupFileAddon01">Hyper spectra data</span>
+                            </div>
+                            <div class="custom-file">
+                                <input type="file" name="csv" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
+                                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroupFileAddon02">Weight data</span>
+                            </div>
+                            <div class="custom-file">
+                                <input type="file" name="weight" class="custom-file-input" id="inputGroupFile02" aria-describedby="inputGroupFileAddon02">
+                                <label class="custom-file-label" for="inputGroupFile02">Choose file</label>
+                            </div>
+                        </div>
+                        <span>Bit range: <span id="bit-start"></span> - <span id="bit-end"></span></span><br/>
+                        <span>Time: <span id="time-start"></span> - <span id="time-end"></span></span>
+                    </p>
+                    <input type="submit" class="btn btn-success">
+                    <a href="/" class="btn btn-warning">Reset</a>
+                </form>
+            </div>
+        </div>
     </div>
 
+    <script src="/static/js/bootstrap.bundle.js"></script>
     <script src="/static/js/date.js"></script>
     <script>
         const time_start = {{ time_start|safe }}
@@ -103,6 +128,7 @@
         const bitRange = bit_end - bit_start
         const timeRange = {{ img_width }}
         const pixelsPerSecond = 4
+        const imgDisplay = document.querySelector('.img-display')
         const img = document.querySelector('.input-img')
         const imgContainer = document.querySelector('.img-container')
         const div1 = document.getElementById('mouse')
@@ -112,12 +138,11 @@
         const bitEnd = document.getElementById('bit-end')
         const timeStart = document.getElementById('time-start')
         const timeEnd = document.getElementById('time-end')
-        const submitA = document.getElementById('submit-link')
         let selecting = false;
 
         function set_pixel_pos(div, event) {
-            const clientX = event.clientX + window.scrollX
-            const clientY = event.clientY + window.scrollY
+            const clientX = event.clientX + imgDisplay.scrollLeft
+            const clientY = event.clientY
             div.style.left = `${Math.min(clientX - (clientX % pixelScale), ((timeRange - 1) * pixelScale))}px`
             div.style.top = `${Math.min(clientY - (clientY % pixelScale), (bitRange) * pixelScale)}px`
         }
@@ -133,10 +158,10 @@
 
         function compute_output() {
             let { top, left, bottom, right } = selection.getClientRects()[0]
-            left += window.scrollX
-            right += window.scrollX
-            top += window.scrollY
-            bottom += window.scrollY
+            left += imgDisplay.scrollLeft
+            right += imgDisplay.scrollLeft
+            top += imgDisplay.scrollTop
+            bottom += imgDisplay.scrollTop
 
             let bit = {
                 start: bit_start + Math.trunc(top / pixelScale),
@@ -150,7 +175,7 @@
             bitEnd.innerText = String(bit.end)
             timeStart.innerText = parse_time(time.start)
             timeEnd.innerText = parse_time(time.end)
-            submitA.href = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
+            document.forms.main.action = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
         }
 
         document.onclick = function (e) {
@@ -173,10 +198,6 @@
                 set_pixel_pos(div2, e)
                 show_selection()
             }
-        }
-        document.onscroll = function () {
-            document.querySelector('.label-bit-wrapper').style.left =
-                document.querySelector('.output').style.left = window.scrollX + 'px'
         }
 
         function show_selection () {
@@ -224,6 +245,14 @@
             }
             timeWrapper.innerHTML = html
         })();
+
+        document.querySelector('#inputGroupFile01').oninput = function () {
+            document.querySelector(`label[for="${this.id}"]`).textContent = this.value
+        };
+
+        document.querySelector('#inputGroupFile02').oninput = function () {
+            document.querySelector(`label[for="${this.id}"]`).textContent = this.value
+        };
 
         (function show_output_labels () {
             bitStart.innerText = String(bit_start)

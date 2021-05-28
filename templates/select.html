@@ -4,14 +4,50 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <title>Select files</title>
 </head>
 <body>
-    <p>CSV input</p>
-    <form method="post" enctype="multipart/form-data">
-        <span>Hyper spectra data location: </span><input type="file" name="csv"><br/>
-        <span>Weight data: </span><input type="file" name="weight"><br/>
-        <input type="submit">
-    </form>
+    <div class="container-fluid p-5">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">User input</h4>
+                <form name="main" method="post" enctype="multipart/form-data">
+                    <p class="card-text">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroupFileAddon01">Hyper spectra data</span>
+                            </div>
+                            <div class="custom-file">
+                                <input type="file" name="csv" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
+                                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="inputGroupFileAddon02">Weight data</span>
+                            </div>
+                            <div class="custom-file">
+                                <input type="file" name="weight" class="custom-file-input" id="inputGroupFile02" aria-describedby="inputGroupFileAddon02">
+                                <label class="custom-file-label" for="inputGroupFile02">Choose file</label>
+                            </div>
+                        </div>
+                    </p>
+                    <input type="submit" class="btn btn-success">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/bootstrap.bundle.js"></script>
+    <script>
+        document.querySelector('#inputGroupFile01').oninput = function () {
+            document.querySelector(`label[for="${this.id}"]`).textContent = this.value
+        };
+
+        document.querySelector('#inputGroupFile02').oninput = function () {
+            document.querySelector(`label[for="${this.id}"]`).textContent = this.value
+        };
+    </script>
 </body>
 </html>
