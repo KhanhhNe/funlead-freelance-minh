@@ -158,8 +158,6 @@ def performPCA(csvfile, weightsfile, start_time=0, end_time=0, bitstart=0, biten
     #
     # fig.set_size_inches(100, 3.2)
     # fig.savefig(f'labelled-{vidnum}.png', dpi=100)
-    print('\t'.join(x_labels))
-    print(''.join(map(lambda p: str(p).ljust(12), x_pos)))
 
     array2 = array2[bitstart:bitend+1,:,:]
 
