@@ -11,6 +11,8 @@ python-dateutil = "*"
 flask = "*"
 pillow = "*"
 pandas = "*"
+matplotlib = "*"
+scikit-learn = "*"
 
 [dev-packages]
 
