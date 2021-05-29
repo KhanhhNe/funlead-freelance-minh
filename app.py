@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import time
@@ -12,6 +13,11 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def select_route():
+    try:
+        file_data = json.load(open('data.json'))
+    except OSError:
+        file_data = {}
+
     if request.method == 'GET':
         if not os.path.exists('data.csv') or not os.path.exists('weight.csv'):
             return render_template('select.html')
@@ -46,21 +52,24 @@ def select_route():
 
         return render_template(
             'index.html', img=img_name, img_width=w, img_height=h, pixel_scale=10,
-            bit_start=bit_start,
-            bit_end=bit_end,
-            time_start=time_start,
-            time_end=time_end
+            bit_start=bit_start, bit_end=bit_end,
+            time_start=time_start, time_end=time_end,
+            csv_name=file_data.get('csv'), weight_name=file_data.get('weight')
         )
     else:
         if request.files.get('csv'):
             csv_file = request.files['csv']
+            file_data['csv'] = csv_file.filename
             csv_file.save('data.csv')
             remove_previous_data()
 
         if request.files.get('weight'):
             weight_file = request.files['weight']
+            file_data['weight'] = weight_file.filename
             weight_file.save('weight.csv')
             remove_previous_data()
+
+        json.dump(file_data, open('data.json', 'w'))
 
         if not request.files.get('csv'):
             return redirect(url_for('select_route', **request.args))

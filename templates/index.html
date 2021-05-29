@@ -95,7 +95,7 @@
                             </div>
                             <div class="custom-file">
                                 <input type="file" name="csv" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
-                                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                                <label class="custom-file-label" for="inputGroupFile01">{{ csv_name or'Choose file' }}</label>
                             </div>
                         </div>
                         <div class="input-group mb-3">
@@ -104,7 +104,7 @@
                             </div>
                             <div class="custom-file">
                                 <input type="file" name="weight" class="custom-file-input" id="inputGroupFile02" aria-describedby="inputGroupFileAddon02">
-                                <label class="custom-file-label" for="inputGroupFile02">Choose file</label>
+                                <label class="custom-file-label" for="inputGroupFile02">{{ weight_name or'Choose file' }}</label>
                             </div>
                         </div>
                         <span>Bit range: <span id="bit-start"></span> - <span id="bit-end"></span></span><br/>
