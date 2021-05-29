@@ -152,7 +152,7 @@
             if (time.getMilliseconds() % 100) {
                 roundedMillis = (time.getMilliseconds() + 100 - time.getMilliseconds() % 100) % 1000
             }
-            return (`${time.toString('u')}.${String(roundedMillis).padEnd(3, '0')}`)
+            return (`${time.toString('u')}.${String(roundedMillis)[0]}`)
                 .replace('Z', '')
         }
 
@@ -239,7 +239,7 @@
             }
 
             while (totalWidth < imgWidth) {
-                html += `<span class="label-time" style="width: ${2*pixelsPerSecond*pixelScale}px">${parse_time(time).split(/ |\./g)[1]}</span>`
+                html += `<span class="label-time" style="width: ${2*pixelsPerSecond*pixelScale}px">${parse_time(time).split(' ')[1]}</span>`
                 time.addSeconds(2)
                 totalWidth += pixelsPerSecond * 2 * pixelScale
             }
