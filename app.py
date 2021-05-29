@@ -39,6 +39,7 @@ def select_route():
         print(start_time, end_time)
         img2 = Image.fromarray(data_array)
         img_name = f'static/imgs/{time.time()}.png'
+        os.makedirs(os.path.dirname(img_name), exist_ok=True)
         img2.save(img_name)
 
         time_start = parse_time_str(start_time)
