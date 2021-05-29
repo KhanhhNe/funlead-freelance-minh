@@ -90,6 +90,7 @@ def remove_previous_data():
     with os.scandir(os.path.join('static', 'imgs')) as it:
         for entry in it:
             os.remove(entry.path)
+    os.remove('data.json')
 
 
 def parse_time_str(time_str):
