@@ -55,14 +55,31 @@ def select_route():
         if request.files.get('csv'):
             csv_file = request.files['csv']
             csv_file.save('data.csv')
+            remove_previous_data()
+
         if request.files.get('weight'):
             weight_file = request.files['weight']
             weight_file.save('weight.csv')
+            remove_previous_data()
 
         if not request.files.get('csv'):
             return redirect(url_for('select_route', **request.args))
         else:
             return redirect(url_for('select_route'))
+
+
+@app.route('/reset')
+def reset_data():
+    os.remove('data.csv')
+    os.remove('weight.csv')
+    remove_previous_data()
+    return redirect(url_for('select_route'))
+
+
+def remove_previous_data():
+    with os.scandir(os.path.join('static', 'imgs')) as it:
+        for entry in it:
+            os.remove(entry.path)
 
 
 def parse_time_str(time_str):
