@@ -17,6 +17,10 @@
             height: {{ img_height * pixel_scale }}px;
             width: {{ img_width * pixel_scale }}px;
         }
+        .output-label {
+            display: inline-block;
+            width: 100px;
+        }
         .pixel, .selection {
             position: absolute;
             z-index: 1;
@@ -107,9 +111,9 @@
                                 <label class="custom-file-label" for="inputGroupFile02">{{ weight_name or'Choose file' }}</label>
                             </div>
                         </div>
-                        <span>Time start: <span id="time-start"></span></span><br/>
-                        <span>Time end: <span id="time-end"></span></span><br/>
-                        <span>Bit range: <span id="bit-start"></span> - <span id="bit-end"></span></span>
+                        <div class="output-label">Time start: </div><span id="time-start"></span><br/>
+                        <div class="output-label">Time end: </div><span id="time-end"></span><br/>
+                        <div class="output-label">Bit range: </div><span id="bit-start"></span> - <span id="bit-end"></span>
                     </p>
                     <input type="submit" class="btn btn-success">
                     <a href="/" class="btn btn-warning">Reset</a>
