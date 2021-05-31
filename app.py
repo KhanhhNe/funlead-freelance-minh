@@ -89,7 +89,7 @@ def reset_data():
 
 
 def remove_previous_data():
-    with os.scandir(os.path.join('static', 'imgs')) as it:
+    with os.scandir(os.path.join(os.getcwd(), 'static', 'imgs')) as it:
         for entry in it:
             os.remove(entry.path)
     if os.path.exists('data.json'):
