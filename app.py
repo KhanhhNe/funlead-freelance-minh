@@ -24,9 +24,9 @@ def select_route():
 
         time_start_str, time_end_str = 0, 0
         if request.args.get('time_start'):
-            time_start_str = request.args['time_start'].removesuffix('00').split()[1]
+            time_start_str = request.args['time_start'].split()[1]
         if request.args.get('time_end'):
-            time_end_str = request.args['time_end'].removesuffix('00').split()[1]
+            time_end_str = request.args['time_end'].split()[1]
 
         bit_start = int(request.args.get('bit_start', '0'))
         bit_end = int(request.args.get('bit_end', '15'))
