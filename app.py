@@ -80,8 +80,10 @@ def select_route():
 
 @app.route('/reset')
 def reset_data():
-    os.remove('data.csv')
-    os.remove('weight.csv')
+    if os.path.exists('data.csv'):
+        os.remove('data.csv')
+    if os.path.exists('weight.csv'):
+        os.remove('weight.csv')
     remove_previous_data()
     return redirect(url_for('select_route'))
 
@@ -90,7 +92,7 @@ def remove_previous_data():
     with os.scandir(os.path.join('static', 'imgs')) as it:
         for entry in it:
             os.remove(entry.path)
-    if not os.path.exists('data.json'):
+    if os.path.exists('data.json'):
         os.remove('data.json')
 
 
