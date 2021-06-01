@@ -10,7 +10,9 @@
         }
         .img-display {
             width: 100vw;
+            height: {{ (bit_end - bit_start + 1 + 10) * pixel_scale }}px;
             overflow-x: scroll;
+            overflow-y: hidden;
             position: relative;
         }
         .input-img {
@@ -51,16 +53,16 @@
         }
         .label-time {
             display: inline-table;
+            transform: rotate(90deg) translate(30px, 25px);
         }
         .label-time::before {
-            content: "-";
+            content: "=";
             display: block;
             position: relative;
-            transform: rotate(90deg) translate(30px, 30px);
+            transform: translate(-10px, 20px);
             color: red;
             text-shadow: 1px 1px 3px black;
-            font-size: 40px;
-            line-height: 10px;
+            line-height: 1;
         }
         img {
             image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
@@ -244,7 +246,7 @@
             }
 
             while (totalWidth < imgWidth) {
-                html += `<span class="label-time" style="width: ${2*pixelsPerSecond*pixelScale}px">${parse_time(time).split(' ')[1]}</span>`
+                html += `<span class="label-time" style="width: ${2*pixelsPerSecond*pixelScale}px">${parse_time(time).split(' ')[1].split('.')[0]}</span>`
                 time.addSeconds(2)
                 totalWidth += pixelsPerSecond * 2 * pixelScale
             }
