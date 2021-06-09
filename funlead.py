@@ -132,7 +132,8 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
                 else:
                     firstlabel +=4
                     x_pos.append(firstlabel)
-
+                #for debug make it white
+                array2[j, t] = [255,255,255]
                 x_labels.append(timelabel2)
                 timelabel = timelabel2
         t += 1
@@ -160,6 +161,12 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
     array2 = array2[bitstart:bitend+1,:,:]
 
     ret_start_time = df_scaled_temp.iloc[0].name.strftime('%Y-%m-%d %H:%M:%S.%f')[:-5]
+
+    print(x_labels)
+    print(x_pos)
+    print(ret_start_time)
+    print(end_time)
+    print(average)
 
     return array2, x_labels, x_pos, ret_start_time, end_time, average
 
