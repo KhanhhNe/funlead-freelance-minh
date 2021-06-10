@@ -31,25 +31,25 @@ def select_route():
         bit_start = int(request.args.get('bit_start', '0'))
         bit_end = int(request.args.get('bit_end', '15'))
 
-        data_array, _, _, start_time, end_time, _ = funlead.performPCA(
-            'data.csv', 'weight.csv',
-            start_time=time_start_str, end_time=time_end_str,
-            bitstart=bit_start, bitend=bit_end
-        )
-        print(start_time, end_time)
-        img2 = Image.fromarray(data_array)
-        img_name = f'static/imgs/{time.time()}.png'
-        os.makedirs(os.path.dirname(img_name), exist_ok=True)
-        img2.save(img_name)
-
-        time_start = parse_time_str(start_time)
-        time_end = parse_time_str(end_time)
-
-        w, h = Image.open(img_name.lstrip('/')).size
-        # img_name = 'static/imgs/default_img.png'
-        # w, h = (5406, 16)
-        # time_start = time_start_str
-        # time_end = time_end_str
+        # data_array, _, _, start_time, end_time, _ = funlead.performPCA(
+        #     'data.csv', 'weight.csv',
+        #     start_time=time_start_str, end_time=time_end_str,
+        #     bitstart=bit_start, bitend=bit_end
+        # )
+        # print(start_time, end_time)
+        # img2 = Image.fromarray(data_array)
+        # img_name = f'static/imgs/{time.time()}.png'
+        # os.makedirs(os.path.dirname(img_name), exist_ok=True)
+        # img2.save(img_name)
+        #
+        # time_start = parse_time_str(start_time)
+        # time_end = parse_time_str(end_time)
+        #
+        # w, h = Image.open(img_name.lstrip('/')).size
+        img_name = 'static/imgs/1623308865.8179305.png'
+        w, h = (5406, 16)
+        time_start = parse_time_str("14:16:04.5")
+        time_end = parse_time_str("14:38:38.0")
 
         return render_template(
             'index.html', img=img_name, img_width=w, img_height=h, pixel_scale=10,

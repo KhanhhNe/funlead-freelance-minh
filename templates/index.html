@@ -73,12 +73,25 @@
             image-rendering: pixelated; /* Chrome */
             -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
         }
+        #popup {
+            font-size: 12px;
+            position: absolute;
+            z-index: 3;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 0px 5px 5px 5px;
+            text-align: center;
+            opacity: 0.8;
+            padding: 5px 10px;
+            margin: {{ pixel_scale }}px 0px 0px {{ pixel_scale }}px;
+        }
     </style>
     <title>Tool</title>
 </head>
 <body>
     <div class="img-container">
         <div class="img-display">
+        <div id="popup" class="bg-white border-dark border">Bit: <span id="popup-bit"></span><br/>Time: <span id="popup-time"></span></div>
         <div class="pixel" id="mouse"></div>
         <div class="pixel" id="mouse2"></div>
         <div class="selection" id="selection"></div>
@@ -127,7 +140,8 @@
         </div>
     </div>
 
-    <script src="/static/js/bootstrap.bundle.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/date.js"></script>
     <script>
         const time_start = {{ time_start|safe }}
@@ -148,7 +162,17 @@
         const bitEnd = document.getElementById('bit-end')
         const timeStart = document.getElementById('time-start')
         const timeEnd = document.getElementById('time-end')
+        const popup = document.getElementById('popup')
+        const popupBit = popup.querySelector('#popup-bit')
+        const popupTime = popup.querySelector('#popup-time')
         let selecting = false;
+
+        function inside_elem(event, elem) {
+            const rect = elem.getBoundingClientRect()
+            if (event.clientX < rect.left || event.clientX > rect.right) return false
+            if (event.clientY < rect.top || event.clientY > rect.bottom) return false
+            return true
+        }
 
         function set_pixel_pos(div, event) {
             const clientX = event.clientX + imgDisplay.scrollLeft
@@ -207,6 +231,18 @@
             if (selecting) {
                 set_pixel_pos(div2, e)
                 show_selection()
+            }
+
+            if (inside_elem(e, img)) {
+                popup.style.display = 'block'
+                const offsetX = e.clientX - img.clientLeft
+                const time = new Date(time_start)
+                time.addSeconds(Math.floor(offsetX / pixelScale) / pixelsPerSecond)
+                popupTime.textContent = parse_time(time).split(' ')[1]
+                popupBit.textContent = `${Math.trunc((e.clientY - img.clientTop) / pixelScale) + bit_start}`
+                set_pixel_pos(popup, e)
+            } else {
+                popup.style.display = 'none'
             }
         }
 
