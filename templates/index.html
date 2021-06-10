@@ -174,11 +174,18 @@
             return true
         }
 
+        function offset_with_elem(event, elem) {
+            const rect = elem.getBoundingClientRect()
+            return {
+                x: (event.clientX - rect.left + elem.scrollLeft),
+                y: (event.clientY - rect.top + elem.scrollTop)
+            }
+        }
+
         function set_pixel_pos(div, event) {
-            const clientX = event.clientX + imgDisplay.scrollLeft
-            const clientY = event.clientY
-            div.style.left = `${Math.min(clientX - (clientX % pixelScale), ((timeRange - 1) * pixelScale))}px`
-            div.style.top = `${Math.min(clientY - (clientY % pixelScale), (bitRange) * pixelScale)}px`
+            const offset = offset_with_elem(event, imgDisplay)
+            div.style.left = `${Math.min(offset.x - (offset.x % pixelScale), ((timeRange - 1) * pixelScale))}px`
+            div.style.top = `${Math.min(offset.y - (offset.y % pixelScale), (bitRange) * pixelScale)}px`
         }
 
         function parse_time(time) {
@@ -209,7 +216,7 @@
             bitEnd.innerText = String(bit.end)
             timeStart.innerText = parse_time(time.start)
             timeEnd.innerText = parse_time(time.end)
-            document.forms.main.action = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
+            document.forms['main'].action = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
         }
 
         document.onclick = function (e) {
@@ -233,13 +240,14 @@
                 show_selection()
             }
 
+            // Display bit and time popup
             if (inside_elem(e, img)) {
                 popup.style.display = 'block'
-                const offsetX = e.clientX - img.clientLeft
+                const offset = offset_with_elem(e, imgDisplay)
                 const time = new Date(time_start)
-                time.addSeconds(Math.floor(offsetX / pixelScale) / pixelsPerSecond)
+                time.addSeconds(Math.floor(offset.x / pixelScale) / pixelsPerSecond)
                 popupTime.textContent = parse_time(time).split(' ')[1]
-                popupBit.textContent = `${Math.trunc((e.clientY - img.clientTop) / pixelScale) + bit_start}`
+                popupBit.textContent = `${Math.trunc(offset.y / pixelScale) + bit_start}`
                 set_pixel_pos(popup, e)
             } else {
                 popup.style.display = 'none'
