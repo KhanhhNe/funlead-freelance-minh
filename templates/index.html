@@ -9,12 +9,14 @@
             padding: 0;
             overflow-x: scroll;
         }
+
         .img-container {
             border: 3px solid black;
             margin: 15px 20px 0px 15px;
             padding: 20px;
             border-radius: 10px;
         }
+
         .img-display {
             width: 100.1%;
             height: {{ (bit_end - bit_start + 1 + 10) * pixel_scale }}px;
@@ -23,24 +25,32 @@
             position: relative;
             margin-top: -1px;
         }
+
         .input-img {
             height: {{ img_height * pixel_scale }}px;
             width: {{ img_width * pixel_scale }}px;
         }
+
         .output-label {
             display: inline-block;
             width: 100px;
         }
+
         .pixel, .selection {
             position: absolute;
             z-index: 1;
         }
+
         .pixel {
             height: {{ pixel_scale }}px !important;
             width: {{ pixel_scale }}px !important;
             display: block;
         }
-        .selection {background-color: rgba(0, 255, 0, 0.2);}
+
+        .selection {
+            background-color: rgba(0, 255, 0, 0.2);
+        }
+
         .label-bit-wrapper {
             position: absolute;
             width: {{ 5 * pixel_scale }}px;
@@ -49,16 +59,25 @@
             z-index: 2;
             user-select: none;
         }
+
         .label-bit {
             margin-bottom: {{ 4 * pixel_scale }}px;
             line-height: {{ pixel_scale }}px;
             font-size: {{ 1.5 * pixel_scale }}px;
         }
-        .label-bit:last-child {margin-bottom: 0;}
-        .label-bit::after {content: " -"}
+
+        .label-bit:last-child {
+            margin-bottom: 0;
+        }
+
+        .label-bit::after {
+            content: " -"
+        }
+
         .label-time-wrapper {
             display: flex;
         }
+
         .label-time {
             display: block;
             writing-mode: vertical-lr;
@@ -66,6 +85,7 @@
             margin-right: 64px;
             font-size: 16px;
         }
+
         .label-time::before {
             content: "=";
             color: red;
@@ -73,13 +93,15 @@
             line-height: 16px;
             font-size: 16px;
         }
+
         img {
-            image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
-            image-rendering: -moz-crisp-edges;          /* Firefox                        */
-            image-rendering: -o-crisp-edges;            /* Opera                          */
+            image-rendering: optimizeSpeed; /* STOP SMOOTHING, GIVE ME SPEED  */
+            image-rendering: -moz-crisp-edges; /* Firefox                        */
+            image-rendering: -o-crisp-edges; /* Opera                          */
             image-rendering: pixelated; /* Chrome */
-            -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+            -ms-interpolation-mode: nearest-neighbor; /* IE8+                           */
         }
+
         #popup {
             font-size: 12px;
             position: absolute;
@@ -96,160 +118,184 @@
     <title>Tool</title>
 </head>
 <body>
-    <div class="img-container">
-        <div class="label-bit-wrapper">
-            {% for val in range(bit_start, bit_end + 1, 5) %}
+<div class="img-container">
+    <div class="label-bit-wrapper">
+        {% for val in range(bit_start, bit_end + 1, 5) %}
             <div class="label-bit">{{ val }}</div>
-            {% endfor %}
-        </div>
-        <div class="img-display">
-        <div id="popup" class="bg-white border-dark border" style="display: none">Bit: <span id="popup-bit"></span><br/>Time: <span id="popup-time"></span></div>
+        {% endfor %}
+    </div>
+    <div class="img-display">
+        <div id="popup" class="bg-white border-dark border" style="display: none">Bit: <span id="popup-bit"></span><br/>Time:
+            <span id="popup-time"></span></div>
         <div class="pixel" id="mouse"></div>
         <div class="pixel" id="mouse2"></div>
         <div class="selection" id="selection"></div>
-            <img src="{{ img }}" class="input-img" style="display: inline" alt="">
-            <div class="label-time-wrapper"></div>
+        <img src="{{ img }}" class="input-img" style="display: inline" alt="">
+        <div class="label-time-wrapper"></div>
+    </div>
+</div>
+<div class="container-fluid p-5">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">User input</h4>
+            <form name="main" method="post" enctype="multipart/form-data">
+                <p class="card-text">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupFileAddon01">Hyper spectra data</span>
+                    </div>
+                    <div class="custom-file">
+                        <input type="file" name="csv" class="custom-file-input" id="inputGroupFile01"
+                               aria-describedby="inputGroupFileAddon01">
+                        <label class="custom-file-label" for="inputGroupFile01">{{ csv_name or'Choose file' }}</label>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupFileAddon02">Weight data</span>
+                    </div>
+                    <div class="custom-file">
+                        <input type="file" name="weight" class="custom-file-input" id="inputGroupFile02"
+                               aria-describedby="inputGroupFileAddon02">
+                        <label class="custom-file-label"
+                               for="inputGroupFile02">{{ weight_name or'Choose file' }}</label>
+                    </div>
+                </div>
+                <div class="output-label">Time start:</div>
+                <span id="time-start"></span><br/>
+                <div class="output-label">Time end:</div>
+                <span id="time-end"></span><br/>
+                <div class="output-label">Bit range:</div>
+                <span id="bit-start"></span> - <span id="bit-end"></span>
+                <div class="input-group mt-2 mb-4">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Moving average</span>
+                    </div>
+                    <input type="number" class="form-control" placeholder="Moving average" aria-label="Moving average"
+                           aria-describedby="basic-addon1" name="moving_average" value="{{ moving_average or 1 }}">
+                </div>
+                </p>
+                <input type="submit" class="btn btn-success">
+                <a href="/" class="btn btn-warning">Reset</a>
+                <a href="/reset" class="btn btn-outline-danger">Restart</a>
+            </form>
         </div>
     </div>
-    <div class="container-fluid p-5">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">User input</h4>
-                <form name="main" method="post" enctype="multipart/form-data">
-                    <p class="card-text">
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="inputGroupFileAddon01">Hyper spectra data</span>
-                            </div>
-                            <div class="custom-file">
-                                <input type="file" name="csv" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
-                                <label class="custom-file-label" for="inputGroupFile01">{{ csv_name or'Choose file' }}</label>
-                            </div>
-                        </div>
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="inputGroupFileAddon02">Weight data</span>
-                            </div>
-                            <div class="custom-file">
-                                <input type="file" name="weight" class="custom-file-input" id="inputGroupFile02" aria-describedby="inputGroupFileAddon02">
-                                <label class="custom-file-label" for="inputGroupFile02">{{ weight_name or'Choose file' }}</label>
-                            </div>
-                        </div>
-                        <div class="output-label">Time start: </div><span id="time-start"></span><br/>
-                        <div class="output-label">Time end: </div><span id="time-end"></span><br/>
-                        <div class="output-label">Bit range: </div><span id="bit-start"></span> - <span id="bit-end"></span>
-                    </p>
-                    <input type="submit" class="btn btn-success">
-                    <a href="/" class="btn btn-warning">Reset</a>
-                    <a href="/reset" class="btn btn-outline-danger">Restart</a>
-                </form>
-            </div>
-        </div>
-    </div>
+</div>
 
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/date.js"></script>
-    <script>
-        const time_start = {{ time_start|safe }}
-        const time_end = {{ time_end|safe }}
-        const pixelScale = {{ pixel_scale }}
-        const bit_start = {{ bit_start }}
-        const bit_end = {{ bit_end }}
-        const bitRange = bit_end - bit_start
-        const timeRange = {{ img_width }}
-        const pixelsPerSecond = 4
-        const imgDisplay = document.querySelector('.img-display')
-        const img = document.querySelector('.input-img')
-        const imgContainer = document.querySelector('.img-container')
-        const div1 = document.getElementById('mouse')
-        const div2 = document.getElementById('mouse2')
-        const selection = document.getElementById('selection')
-        const bitStart = document.getElementById('bit-start')
-        const bitEnd = document.getElementById('bit-end')
-        const timeStart = document.getElementById('time-start')
-        const timeEnd = document.getElementById('time-end')
-        const popup = document.getElementById('popup')
-        const popupBit = popup.querySelector('#popup-bit')
-        const popupTime = popup.querySelector('#popup-time')
-        let selecting = false;
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/date.js"></script>
+<script>
+    const time_start ={{ time_start|safe }}
+    const time_end ={{ time_end|safe }}
+    const pixelScale ={{ pixel_scale }}
+    const bit_start ={{ bit_start }}
+    const bit_end ={{ bit_end }}
+    const bitRange = bit_end - bit_start
+    const timeRange ={{ img_width }}
+    const pixelsPerSecond = 4
+    const imgDisplay = document.querySelector('.img-display')
+    const img = document.querySelector('.input-img')
+    const imgContainer = document.querySelector('.img-container')
+    const div1 = document.getElementById('mouse')
+    const div2 = document.getElementById('mouse2')
+    const selection = document.getElementById('selection')
+    const bitStart = document.getElementById('bit-start')
+    const bitEnd = document.getElementById('bit-end')
+    const timeStart = document.getElementById('time-start')
+    const timeEnd = document.getElementById('time-end')
+    const movingAverage = document.querySelector('input[name="moving_average"]')
+    const popup = document.getElementById('popup')
+    const popupBit = popup.querySelector('#popup-bit')
+    const popupTime = popup.querySelector('#popup-time')
+    let selecting = false;
 
-        function inside_elem(event, elem) {
-            const rect = elem.getBoundingClientRect()
-            if (event.x < rect.left || event.x > rect.right) return false
-            if (event.y < rect.top || event.y > rect.bottom) return false
-            return true
+    function inside_elem(event, elem) {
+        const rect = elem.getBoundingClientRect()
+        if (event.x < rect.left || event.x > rect.right) return false
+        if (event.y < rect.top || event.y > rect.bottom) return false
+        return true
+    }
+
+    function offset_with_elem(event, elem) {
+        const rect = elem.getBoundingClientRect()
+        return {
+            x: (event.x - rect.x + elem.scrollLeft),
+            y: (event.y - rect.y + elem.scrollTop)
         }
+    }
 
-        function offset_with_elem(event, elem) {
-            const rect = elem.getBoundingClientRect()
-            return {
-                x: (event.x - rect.x + elem.scrollLeft),
-                y: (event.y - rect.y + elem.scrollTop)
-            }
+    function get_pixel_pos(event) {
+        const offset = offset_with_elem(event, imgDisplay)
+        return {
+            x: Math.min(offset.x - (offset.x % pixelScale), ((timeRange - 1) * pixelScale)),
+            y: Math.min(offset.y - (offset.y % pixelScale), (bitRange) * pixelScale)
         }
+    }
 
-        function get_pixel_pos(event) {
-            const offset = offset_with_elem(event, imgDisplay)
-            return {
-                x: Math.min(offset.x - (offset.x % pixelScale), ((timeRange - 1) * pixelScale)),
-                y: Math.min(offset.y - (offset.y % pixelScale), (bitRange) * pixelScale)
-            }
+    function set_pixel_pos(event, elem, offsetX = 0, offsetY = 0) {
+        const pos = get_pixel_pos(event)
+        elem.style.marginLeft = `${pos.x + offsetX}px`
+        elem.style.marginTop = `${pos.y + offsetY}px`
+    }
+
+    function parse_time(time) {
+        let roundedMillis = time.getMilliseconds()
+        if (time.getMilliseconds() % 250) {
+            roundedMillis = (time.getMilliseconds() + 250 - time.getMilliseconds() % 250) % 1000
         }
+        roundedMillis = Math.ceil(roundedMillis / 100) * 100
+        return (`${time.toString('u')}.${String(roundedMillis)[0]}`)
+            .replace('Z', '')
+    }
 
-        function set_pixel_pos(event, elem, offsetX=0, offsetY=0) {
-            const pos = get_pixel_pos(event)
-            elem.style.marginLeft = `${pos.x + offsetX}px`
-            elem.style.marginTop = `${pos.y + offsetY}px`
+    function compute_output() {
+        let {top, left, bottom, right} = selection.getBoundingClientRect()
+        const displayRect = imgDisplay.getBoundingClientRect()
+        left += imgDisplay.scrollLeft - displayRect.x
+        right += imgDisplay.scrollLeft - displayRect.x
+        top += imgDisplay.scrollTop - displayRect.y
+        bottom += imgDisplay.scrollTop - displayRect.y
+
+        let bit = {
+            start: bit_start + Math.trunc(top / pixelScale),
+            end: bit_start + Math.trunc(bottom / pixelScale - 1)
         }
-
-        function parse_time(time) {
-            let roundedMillis = time.getMilliseconds()
-            if (time.getMilliseconds() % 250) {
-                roundedMillis = (time.getMilliseconds() + 250 - time.getMilliseconds() % 250) % 1000
-            }
-            roundedMillis = Math.ceil(roundedMillis / 100) * 100
-            return (`${time.toString('u')}.${String(roundedMillis)[0]}`)
-                .replace('Z', '')
+        console.log(imgDisplay.clientTop)
+        let time = {
+            start: (new Date(time_start)).addMilliseconds(left / pixelScale / pixelsPerSecond * 1000),
+            end: (new Date(time_start)).addMilliseconds((right / pixelScale - 1) / pixelsPerSecond * 1000)
         }
+        bitStart.innerText = String(bit.start)
+        bitEnd.innerText = String(bit.end)
+        timeStart.innerText = parse_time(time.start)
+        timeEnd.innerText = parse_time(time.end)
+        document.forms['main'].action = `/` +
+            `?bit_start=${bit.start}` +
+            `&bit_end=${bit.end}` +
+            `&time_start=${parse_time(time.start)}` +
+            `&time_end=${parse_time(time.end)}` +
+            `&moving_average=${movingAverage.value}`
+    }
 
-        function compute_output() {
-            let { top, left, bottom, right } = selection.getBoundingClientRect()
-            const displayRect = imgDisplay.getBoundingClientRect()
-            left += imgDisplay.scrollLeft - displayRect.x
-            right += imgDisplay.scrollLeft - displayRect.x
-            top += imgDisplay.scrollTop - displayRect.y
-            bottom += imgDisplay.scrollTop - displayRect.y
-
-            let bit = {
-                start: bit_start + Math.trunc(top / pixelScale),
-                end: bit_start + Math.trunc(bottom / pixelScale - 1)
-            }
-            console.log(imgDisplay.clientTop)
-            let time = {
-                start: (new Date(time_start)).addMilliseconds(left / pixelScale / pixelsPerSecond * 1000),
-                end: (new Date(time_start)).addMilliseconds((right / pixelScale - 1) / pixelsPerSecond * 1000)
-            }
-            bitStart.innerText = String(bit.start)
-            bitEnd.innerText = String(bit.end)
-            timeStart.innerText = parse_time(time.start)
-            timeEnd.innerText = parse_time(time.end)
-            document.forms['main'].action = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
+    document.onclick = function (e) {
+        if (inside_elem(e, img)) {
+        if (!selecting) {
+            set_pixel_pos(e, div1)
+            selection.style.width = '0px'
+        } else {
+            set_pixel_pos(e, div2)
+            show_selection()
+            compute_output()
         }
-
-        imgDisplay.onclick = function (e) {
-            if (!selecting) {
-                set_pixel_pos(e, div1)
-                selection.style.width = '0px'
-            } else {
-                set_pixel_pos(e, div2)
-                show_selection()
-                compute_output()
-            }
-            selecting = !selecting
+        selecting = !selecting
         }
+    }
 
-        imgDisplay.onmousemove = function (e) {
+    document.onmousemove = function (e) {
+        if (inside_elem(e, img)) {
+            popup.style.display = 'block'
             if (selecting) {
                 set_pixel_pos(e, div2)
                 show_selection()
@@ -260,89 +306,73 @@
             popupTime.textContent = parse_time(time).split(' ')[1]
             popupBit.textContent = `${Math.trunc(offset.y / pixelScale) + bit_start}`
             set_pixel_pos(e, popup, 10, 10)
+        } else {
+            popup.style.display = 'none'
+        }
+    }
+
+    function show_selection() {
+        let top1 = parseInt(div1.style.marginTop);
+        let top2 = parseInt(div2.style.marginTop);
+        if (top1 > top2) {
+            [top1, top2] = [top2, top1]
+        }
+        let left1 = parseInt(div1.style.marginLeft);
+        let left2 = parseInt(div2.style.marginLeft);
+        if (left1 > left2) {
+            [left1, left2] = [left2, left1]
+        }
+        selection.style.marginTop = `${top1}px`
+        selection.style.marginLeft = `${left1}px`
+
+        selection.style.height = `${top2 - top1 + pixelScale}px`
+        selection.style.width = `${left2 - left1 + pixelScale}px`
+    }
+
+    (function add_time_label() {
+        const timeWrapper = document.querySelector('.label-time-wrapper')
+        const imgWidth = img.width
+        let html = ''
+        let time = new Date(time_start)
+        let totalWidth = 0
+
+        if (imgWidth === 0) {
+            setTimeout(add_time_label)
+            return
         }
 
-        document.onclick = function (e) {
-            if (inside_elem(e, img)) {
-                return false
-            }
+        let offset_width = 0
+        if (time.getMilliseconds()) {
+            const offset_millis = 1000 - time.getMilliseconds() % 1000;
+            offset_width = offset_millis / 1000 * pixelsPerSecond * pixelScale
+            time.addMilliseconds(offset_millis)
+            totalWidth += offset_width
         }
 
-        document.onmousemove = function (e) {
-            if (inside_elem(e, img)) {
-                popup.style.display = 'block'
-                return false
-            } else {
-                popup.style.display = 'none'
-                return true
-            }
+        while (totalWidth < imgWidth) {
+            const style = offset_width ? `style="margin-left: ${offset_width - 0.15 * pixelScale}px"` : ''
+            offset_width = 0
+            html += `<span class="label-time" ${style}>${parse_time(time).split(' ')[1].split('.')[0]}</span>`
+            time.addSeconds(2)
+            totalWidth += pixelsPerSecond * 2 * pixelScale
         }
+        timeWrapper.innerHTML = html
+    })();
 
-        div1.onmousemove = div2.onmousemove = selection.onmousemove = () => false
-        div1.onclick = div2.onclick = selection.onclick = () => false
+    document.querySelector('#inputGroupFile01').oninput = function () {
+        document.querySelector(`label[for="${this.id}"]`).textContent = this.value
+    };
 
-        function show_selection () {
-            let top1 = parseInt(div1.style.marginTop);
-            let top2 = parseInt(div2.style.marginTop);
-            if (top1 > top2) {
-                [top1, top2] = [top2, top1]
-            }
-            let left1 = parseInt(div1.style.marginLeft);
-            let left2 = parseInt(div2.style.marginLeft);
-            if (left1 > left2) {
-                [left1, left2] = [left2, left1]
-            }
-            selection.style.marginTop = `${top1}px`
-            selection.style.marginLeft = `${left1}px`
+    document.querySelector('#inputGroupFile02').oninput = function () {
+        document.querySelector(`label[for="${this.id}"]`).textContent = this.value
+    };
 
-            selection.style.height = `${top2 - top1 + pixelScale}px`
-            selection.style.width = `${left2 - left1 + pixelScale}px`
-        }
-
-        (function add_time_label() {
-            const timeWrapper = document.querySelector('.label-time-wrapper')
-            const imgWidth = img.width
-            let html = ''
-            let time = new Date(time_start)
-            let totalWidth = 0
-
-            if (imgWidth === 0) {
-                setTimeout(add_time_label)
-                return
-            }
-
-            let offset_width = 0
-            if (time.getMilliseconds()) {
-                const offset_millis = 1000 - time.getMilliseconds() % 1000;
-                offset_width = offset_millis / 1000 * pixelsPerSecond * pixelScale
-                time.addMilliseconds(offset_millis)
-                totalWidth += offset_width
-            }
-
-            while (totalWidth < imgWidth) {
-                const style = offset_width ? `style="margin-left: ${offset_width - 0.15 * pixelScale}px"` : ''
-                offset_width = 0
-                html += `<span class="label-time" ${style}>${parse_time(time).split(' ')[1].split('.')[0]}</span>`
-                time.addSeconds(2)
-                totalWidth += pixelsPerSecond * 2 * pixelScale
-            }
-            timeWrapper.innerHTML = html
-        })();
-
-        document.querySelector('#inputGroupFile01').oninput = function () {
-            document.querySelector(`label[for="${this.id}"]`).textContent = this.value
-        };
-
-        document.querySelector('#inputGroupFile02').oninput = function () {
-            document.querySelector(`label[for="${this.id}"]`).textContent = this.value
-        };
-
-        (function show_output_labels () {
-            bitStart.innerText = String(bit_start)
-            bitEnd.innerText = String(bit_end)
-            timeStart.innerText = parse_time(time_start)
-            timeEnd.innerText = parse_time(time_end)
-        })()
-    </script>
+    (function show_output_labels() {
+        bitStart.innerText = String(bit_start)
+        bitEnd.innerText = String(bit_end)
+        timeStart.innerText = parse_time(time_start)
+        timeEnd.innerText = parse_time(time_end)
+    })()
+</script>
 </body>
 </html>

@@ -30,32 +30,34 @@ def select_route():
 
         bit_start = int(request.args.get('bit_start', '0'))
         bit_end = int(request.args.get('bit_end', '15'))
+        moving_average = int(request.args.get('moving_average', '1'))
 
-        # data_array, _, _, start_time, end_time, _ = funlead.performPCA(
-        #     'data.csv', 'weight.csv',
-        #     start_time=time_start_str, end_time=time_end_str,
-        #     bitstart=bit_start, bitend=bit_end
-        # )
-        # print(start_time, end_time)
-        # img2 = Image.fromarray(data_array)
-        # img_name = f'static/imgs/{time.time()}.png'
-        # os.makedirs(os.path.dirname(img_name), exist_ok=True)
-        # img2.save(img_name)
-        #
-        # time_start = parse_time_str(start_time)
-        # time_end = parse_time_str(end_time)
-        #
-        # w, h = Image.open(img_name.lstrip('/')).size
-        img_name = 'static/imgs/1623308865.8179305.png'
-        w, h = (5406, 16)
-        time_start = parse_time_str("14:16:04.5")
-        time_end = parse_time_str("14:38:38.0")
+        data_array, _, _, start_time, end_time, moving_average = funlead.performPCA(
+            'data.csv', 'weight.csv',
+            start_time=time_start_str, end_time=time_end_str,
+            bitstart=bit_start, bitend=bit_end, average=moving_average
+        )
+        print(start_time, end_time)
+        img2 = Image.fromarray(data_array)
+        img_name = f'static/imgs/{time.time()}.png'
+        os.makedirs(os.path.dirname(img_name), exist_ok=True)
+        img2.save(img_name)
+
+        time_start = parse_time_str(start_time)
+        time_end = parse_time_str(end_time)
+
+        w, h = Image.open(img_name.lstrip('/')).size
+        # img_name = 'static/imgs/1623308865.8179305.png'
+        # w, h = (5406, 16)
+        # time_start = parse_time_str("14:16:04.5")
+        # time_end = parse_time_str("14:38:38.0")
 
         return render_template(
             'index.html', img=img_name, img_width=w, img_height=h, pixel_scale=10,
             bit_start=bit_start, bit_end=bit_end,
             time_start=time_start, time_end=time_end,
-            csv_name=file_data.get('csv'), weight_name=file_data.get('weight')
+            csv_name=file_data.get('csv'), weight_name=file_data.get('weight'),
+            moving_average=moving_average
         )
     else:
         if request.files.get('csv'):
