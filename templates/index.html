@@ -53,17 +53,18 @@
             display: flex;
         }
         .label-time {
-            display: inline-table;
-            transform: rotate(90deg) translate(30px, 25px);
+            display: block;
+            writing-mode: vertical-lr;
+            line-height: 16px;
+            margin-right: 64px;
+            font-size: 16px;
         }
         .label-time::before {
             content: "=";
-            display: block;
-            position: relative;
-            transform: translate(-10px, 20px);
             color: red;
             text-shadow: 1px 1px 3px black;
-            line-height: 1;
+            line-height: 16px;
+            font-size: 16px;
         }
         img {
             image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
@@ -120,6 +121,7 @@
                     </p>
                     <input type="submit" class="btn btn-success">
                     <a href="/" class="btn btn-warning">Reset</a>
+                    <a href="/reset" class="btn btn-outline-danger">Restart</a>
                 </form>
             </div>
         </div>
@@ -238,16 +240,18 @@
                 return
             }
 
+            let offset_width = 0
             if (time.getMilliseconds()) {
                 const offset_millis = 1000 - time.getMilliseconds() % 1000;
-                const offset_width = offset_millis / 1000 * pixelsPerSecond * pixelScale
-                html += `<div style="height: ${pixelScale}px; width: ${offset_width}px; display: inline-table"></div>`
+                offset_width = offset_millis / 1000 * pixelsPerSecond * pixelScale
                 time.addMilliseconds(offset_millis)
                 totalWidth += offset_width
             }
 
             while (totalWidth < imgWidth) {
-                html += `<span class="label-time" style="width: ${2*pixelsPerSecond*pixelScale}px">${parse_time(time).split(' ')[1].split('.')[0]}</span>`
+                const style = offset_width ? `style="margin-left: ${offset_width - 0.15 * pixelScale}px"` : ''
+                offset_width = 0
+                html += `<span class="label-time" ${style}>${parse_time(time).split(' ')[1].split('.')[0]}</span>`
                 time.addSeconds(2)
                 totalWidth += pixelsPerSecond * 2 * pixelScale
             }
