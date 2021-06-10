@@ -9,12 +9,19 @@
             padding: 0;
             overflow-x: scroll;
         }
+        .img-container {
+            border: 3px solid black;
+            margin: 15px 20px 0px 15px;
+            padding: 20px;
+            border-radius: 10px;
+        }
         .img-display {
-            width: 100vw;
+            width: 100.1%;
             height: {{ (bit_end - bit_start + 1 + 10) * pixel_scale }}px;
             overflow-x: scroll;
             overflow-y: hidden;
             position: relative;
+            margin-top: -1px;
         }
         .input-img {
             height: {{ img_height * pixel_scale }}px;
@@ -90,16 +97,16 @@
 </head>
 <body>
     <div class="img-container">
-        <div class="img-display">
-        <div id="popup" class="bg-white border-dark border">Bit: <span id="popup-bit"></span><br/>Time: <span id="popup-time"></span></div>
-        <div class="pixel" id="mouse"></div>
-        <div class="pixel" id="mouse2"></div>
-        <div class="selection" id="selection"></div>
         <div class="label-bit-wrapper">
             {% for val in range(bit_start, bit_end + 1, 5) %}
             <div class="label-bit">{{ val }}</div>
             {% endfor %}
         </div>
+        <div class="img-display">
+        <div id="popup" class="bg-white border-dark border" style="display: none">Bit: <span id="popup-bit"></span><br/>Time: <span id="popup-time"></span></div>
+        <div class="pixel" id="mouse"></div>
+        <div class="pixel" id="mouse2"></div>
+        <div class="selection" id="selection"></div>
             <img src="{{ img }}" class="input-img" style="display: inline" alt="">
             <div class="label-time-wrapper"></div>
         </div>
@@ -169,45 +176,56 @@
 
         function inside_elem(event, elem) {
             const rect = elem.getBoundingClientRect()
-            if (event.clientX < rect.left || event.clientX > rect.right) return false
-            if (event.clientY < rect.top || event.clientY > rect.bottom) return false
+            if (event.x < rect.left || event.x > rect.right) return false
+            if (event.y < rect.top || event.y > rect.bottom) return false
             return true
         }
 
         function offset_with_elem(event, elem) {
             const rect = elem.getBoundingClientRect()
             return {
-                x: (event.clientX - rect.left + elem.scrollLeft),
-                y: (event.clientY - rect.top + elem.scrollTop)
+                x: (event.x - rect.x + elem.scrollLeft),
+                y: (event.y - rect.y + elem.scrollTop)
             }
         }
 
-        function set_pixel_pos(div, event) {
+        function get_pixel_pos(event) {
             const offset = offset_with_elem(event, imgDisplay)
-            div.style.left = `${Math.min(offset.x - (offset.x % pixelScale), ((timeRange - 1) * pixelScale))}px`
-            div.style.top = `${Math.min(offset.y - (offset.y % pixelScale), (bitRange) * pixelScale)}px`
+            return {
+                x: Math.min(offset.x - (offset.x % pixelScale), ((timeRange - 1) * pixelScale)),
+                y: Math.min(offset.y - (offset.y % pixelScale), (bitRange) * pixelScale)
+            }
+        }
+
+        function set_pixel_pos(event, elem, offsetX=0, offsetY=0) {
+            const pos = get_pixel_pos(event)
+            elem.style.marginLeft = `${pos.x + offsetX}px`
+            elem.style.marginTop = `${pos.y + offsetY}px`
         }
 
         function parse_time(time) {
             let roundedMillis = time.getMilliseconds()
-            if (time.getMilliseconds() % 100) {
-                roundedMillis = (time.getMilliseconds() + 100 - time.getMilliseconds() % 100) % 1000
+            if (time.getMilliseconds() % 250) {
+                roundedMillis = (time.getMilliseconds() + 250 - time.getMilliseconds() % 250) % 1000
             }
+            roundedMillis = Math.ceil(roundedMillis / 100) * 100
             return (`${time.toString('u')}.${String(roundedMillis)[0]}`)
                 .replace('Z', '')
         }
 
         function compute_output() {
-            let { top, left, bottom, right } = selection.getClientRects()[0]
-            left += imgDisplay.scrollLeft
-            right += imgDisplay.scrollLeft
-            top += imgDisplay.scrollTop
-            bottom += imgDisplay.scrollTop
+            let { top, left, bottom, right } = selection.getBoundingClientRect()
+            const displayRect = imgDisplay.getBoundingClientRect()
+            left += imgDisplay.scrollLeft - displayRect.x
+            right += imgDisplay.scrollLeft - displayRect.x
+            top += imgDisplay.scrollTop - displayRect.y
+            bottom += imgDisplay.scrollTop - displayRect.y
 
             let bit = {
                 start: bit_start + Math.trunc(top / pixelScale),
                 end: bit_start + Math.trunc(bottom / pixelScale - 1)
             }
+            console.log(imgDisplay.clientTop)
             let time = {
                 start: (new Date(time_start)).addMilliseconds(left / pixelScale / pixelsPerSecond * 1000),
                 end: (new Date(time_start)).addMilliseconds((right / pixelScale - 1) / pixelsPerSecond * 1000)
@@ -219,54 +237,63 @@
             document.forms['main'].action = `/?bit_start=${bit.start}&bit_end=${bit.end}&time_start=${parse_time(time.start)}&time_end=${parse_time(time.end)}`
         }
 
-        document.onclick = function (e) {
-            if (imgContainer !== e.target && !imgContainer.contains(e.target)) {
-                return
-            }
+        imgDisplay.onclick = function (e) {
             if (!selecting) {
-                set_pixel_pos(div1, e)
+                set_pixel_pos(e, div1)
                 selection.style.width = '0px'
             } else {
-                set_pixel_pos(div2, e)
+                set_pixel_pos(e, div2)
                 show_selection()
                 compute_output()
             }
             selecting = !selecting
         }
 
-        document.onmousemove = function (e) {
+        imgDisplay.onmousemove = function (e) {
             if (selecting) {
-                set_pixel_pos(div2, e)
+                set_pixel_pos(e, div2)
                 show_selection()
             }
+            const offset = offset_with_elem(e, imgDisplay)
+            const time = new Date(time_start)
+            time.addSeconds(Math.trunc(offset.x / pixelScale) / pixelsPerSecond)
+            popupTime.textContent = parse_time(time).split(' ')[1]
+            popupBit.textContent = `${Math.trunc(offset.y / pixelScale) + bit_start}`
+            set_pixel_pos(e, popup, 10, 10)
+        }
 
-            // Display bit and time popup
+        document.onclick = function (e) {
             if (inside_elem(e, img)) {
-                popup.style.display = 'block'
-                const offset = offset_with_elem(e, imgDisplay)
-                const time = new Date(time_start)
-                time.addSeconds(Math.floor(offset.x / pixelScale) / pixelsPerSecond)
-                popupTime.textContent = parse_time(time).split(' ')[1]
-                popupBit.textContent = `${Math.trunc(offset.y / pixelScale) + bit_start}`
-                set_pixel_pos(popup, e)
-            } else {
-                popup.style.display = 'none'
+                return false
             }
         }
 
+        document.onmousemove = function (e) {
+            if (inside_elem(e, img)) {
+                popup.style.display = 'block'
+                return false
+            } else {
+                popup.style.display = 'none'
+                return true
+            }
+        }
+
+        div1.onmousemove = div2.onmousemove = selection.onmousemove = () => false
+        div1.onclick = div2.onclick = selection.onclick = () => false
+
         function show_selection () {
-            let top1 = parseInt(div1.style.top);
-            let top2 = parseInt(div2.style.top);
+            let top1 = parseInt(div1.style.marginTop);
+            let top2 = parseInt(div2.style.marginTop);
             if (top1 > top2) {
                 [top1, top2] = [top2, top1]
             }
-            let left1 = parseInt(div1.style.left);
-            let left2 = parseInt(div2.style.left);
+            let left1 = parseInt(div1.style.marginLeft);
+            let left2 = parseInt(div2.style.marginLeft);
             if (left1 > left2) {
                 [left1, left2] = [left2, left1]
             }
-            selection.style.top = `${top1}px`
-            selection.style.left = `${left1}px`
+            selection.style.marginTop = `${top1}px`
+            selection.style.marginLeft = `${left1}px`
 
             selection.style.height = `${top2 - top1 + pixelScale}px`
             selection.style.width = `${left2 - left1 + pixelScale}px`
