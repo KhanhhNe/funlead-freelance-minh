@@ -59,15 +59,26 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
     #drop pixelindex for now and add it later
     df_cut_temp = df_cut_withpixelindex.drop(["pixelindex"], axis=1)
 
+    #apply moving average:
+    if average > 1:
+        for column in df_cut_temp.columns:
+            # print(column)
+            df_cut_temp[column] = df_cut_temp[column].rolling(window=average).mean()
+
+        #remove average rows
+        df_cut_withpixelindex = df_cut_withpixelindex.iloc[average-1:]
+        df_cut_temp = df_cut_temp.iloc[average-1:]
+
     #apply weights
     df_weights_cut = df_weight.loc[:, START:END]
     for index, value in enumerate(df_weights_cut.values[0]):
         # print(index)
         df_cut_temp[START + index] = df_cut_temp[START + index] * value
 
+
     # construct PCA
     pca = PCA(n_components=3)
-    dt = pca.fit_transform(df_cut_temp.iloc[:, :].values)
+    dt = pca.fit_transform(df_cut_temp.iloc[:,:].values)
     df_pca = pd.DataFrame(data=dt)
     columns = [0, 1, 2]
     df_pca.columns = columns
@@ -101,6 +112,8 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
     # for labels
     x_pos = []
     x_labels = []
+    x_pos2 = []
+    x_labels2 = []
     position = 0
     # this will be the label for the time
     timelabel = df_scaled_temp.iloc[0].name.strftime('%H:%M:%S')
@@ -124,8 +137,7 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
                 timelabel2 = df_scaled_temp.iloc[position].name.strftime('%H:%M:%S')
 
             if timelabel != timelabel2:
-                # print(f'timelable 1 {timelabel} timelabel{timelabel2}')
-                # print(timelabel2)
+
                 if firstlabel == 0:
                     firstlabel = math.ceil(position / 16)
                     x_pos.append(firstlabel)
@@ -136,13 +148,16 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
                 array2[j, t] = [255,255,255]
                 x_labels.append(timelabel2)
                 timelabel = timelabel2
+
+
+
         t += 1
 
         # # every 160 rows we label
         # temp = i / 16
-        # if temp % 4 == 0:
-        #     x_pos.append(temp)
-        #     x_labels.append(df_scaled_temp.iloc[i].name.strftime('%H:%M:%S'))
+        # if temp % 10 == 0:
+        #     x_pos2.append(temp)
+        #     x_labels2.append(df_scaled_temp.iloc[i].name.strftime('%H:%M:%S'))
 
     # # create the image without labels
     # img2 = Image.fromarray(array2)
@@ -172,7 +187,7 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
 
 
 
-def performPCA2():
+def performPCAPhase1():
 
     # change the values here for different out put files
     CONFIG = [{'csvfile':'FLT7_dc_20210108.csv',

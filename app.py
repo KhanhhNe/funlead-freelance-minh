@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import threading
 import time
 
 from PIL import Image
@@ -9,75 +10,84 @@ from flask import Flask, render_template, send_from_directory, request, url_for,
 import funlead
 
 app = Flask(__name__)
+PIXEL_SCALE = 10
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def select_route():
     try:
         file_data = json.load(open('data.json'))
     except OSError:
         file_data = {}
 
-    if request.method == 'GET':
-        if not os.path.exists('data.csv') or not os.path.exists('weight.csv'):
-            return render_template('select.html')
+    if not os.path.exists('data.csv') or not os.path.exists('weight.csv'):
+        return render_template('select.html')
 
-        time_start_str, time_end_str = 0, 0
-        if request.args.get('time_start'):
-            time_start_str = request.args['time_start'].split()[1]
-        if request.args.get('time_end'):
-            time_end_str = request.args['time_end'].split()[1]
+    time_start_str, time_end_str = 0, 0
+    if request.args.get('time_start'):
+        time_start_str = request.args['time_start'].split()[1]
+    if request.args.get('time_end'):
+        time_end_str = request.args['time_end'].split()[1]
 
-        bit_start = int(request.args.get('bit_start', '0'))
-        bit_end = int(request.args.get('bit_end', '15'))
-        moving_average = int(request.args.get('moving_average', '1'))
+    bit_start = int(request.args.get('bit_start', '0'))
+    bit_end = int(request.args.get('bit_end', '15'))
+    moving_average = int(request.args.get('moving_average', '1'))
+    # img_path = f'static/imgs/{time.time()}.png'
+    # thread = threading.Thread(target=render_image, args=(
+    #     time_start_str, time_end_str,
+    #     bit_start, bit_end, moving_average,
+    #     img_path
+    # ))
+    # thread.start()
 
-        data_array, _, _, start_time, end_time, moving_average = funlead.performPCA(
-            'data.csv', 'weight.csv',
-            start_time=time_start_str, end_time=time_end_str,
-            bitstart=bit_start, bitend=bit_end, average=moving_average
-        )
-        print(start_time, end_time)
-        img2 = Image.fromarray(data_array)
-        img_name = f'static/imgs/{time.time()}.png'
-        os.makedirs(os.path.dirname(img_name), exist_ok=True)
-        img2.save(img_name)
+    img_path = 'static/imgs/1623399829.6667395.png'
 
-        time_start = parse_time_str(start_time)
-        time_end = parse_time_str(end_time)
+    return render_template(
+        'index.html', img=img_path, pixel_scale=PIXEL_SCALE,
+        bit_start=bit_start, bit_end=bit_end,
+        moving_average=moving_average,
+        img_url=img_path, csv_name=file_data.get('csv'), weight_name=file_data.get('weight')
+    )
 
-        w, h = Image.open(img_name.lstrip('/')).size
-        # img_name = 'static/imgs/1623308865.8179305.png'
-        # w, h = (5406, 16)
-        # time_start = parse_time_str("14:16:04.5")
-        # time_end = parse_time_str("14:38:38.0")
 
-        return render_template(
-            'index.html', img=img_name, img_width=w, img_height=h, pixel_scale=10,
-            bit_start=bit_start, bit_end=bit_end,
-            time_start=time_start, time_end=time_end,
-            csv_name=file_data.get('csv'), weight_name=file_data.get('weight'),
-            moving_average=moving_average
-        )
+@app.route('/upload', methods=["POST"])
+def upload_files():
+    try:
+        file_data = json.load(open('data.json'))
+    except OSError:
+        file_data = {}
+
+    if request.files.get('csv'):
+        csv_file = request.files['csv']
+        file_data['csv'] = csv_file.filename
+        csv_file.save('data.csv')
+        remove_previous_data()
+
+    if request.files.get('weight'):
+        weight_file = request.files['weight']
+        file_data['weight'] = weight_file.filename
+        weight_file.save('weight.csv')
+        remove_previous_data()
+
+    json.dump(file_data, open('data.json', 'w'))
+    return ''
+
+
+@app.route('/get-image')
+def get_image():
+    img_path = request.args.get('img_url', '')
+    if os.path.exists(img_path):
+        img_data = json.load(open('img_data.json'))
+        w, h = Image.open(img_path.lstrip('/')).size
+        return json.dumps({
+            'url': img_path,
+            'width': w,
+            'height': h,
+            'start': img_data.get(img_path, {}).get('start'),
+            'end': img_data.get(img_path, {}).get('end')
+        })
     else:
-        if request.files.get('csv'):
-            csv_file = request.files['csv']
-            file_data['csv'] = csv_file.filename
-            csv_file.save('data.csv')
-            remove_previous_data()
-
-        if request.files.get('weight'):
-            weight_file = request.files['weight']
-            file_data['weight'] = weight_file.filename
-            weight_file.save('weight.csv')
-            remove_previous_data()
-
-        json.dump(file_data, open('data.json', 'w'))
-
-        if not request.files.get('csv'):
-            return redirect(url_for('select_route', **request.args))
-        else:
-            return redirect(url_for('select_route'))
+        return '{}'
 
 
 @app.route('/reset')
@@ -88,6 +98,28 @@ def reset_data():
         os.remove('weight.csv')
     remove_previous_data()
     return redirect(url_for('select_route'))
+
+
+def render_image(time_start_str, time_end_str, bit_start, bit_end, moving_average, img_path):
+    try:
+        img_data = json.load(open('img_data.json'))
+    except FileNotFoundError:
+        img_data = {}
+
+    data_array, _, _, start_time, end_time, _ = funlead.performPCA(
+        'data.csv', 'weight.csv',
+        start_time=time_start_str, end_time=time_end_str,
+        bitstart=bit_start, bitend=bit_end, average=moving_average
+    )
+    img2 = Image.fromarray(data_array)
+    os.makedirs(os.path.dirname(img_path), exist_ok=True)
+    img2.save(img_path)
+    img_data[img_path] = {
+        'start': parse_time_str(start_time),
+        'end': parse_time_str(end_time)
+    }
+
+    json.dump(img_data, open('img_data.json', 'w+'))
 
 
 def remove_previous_data():
