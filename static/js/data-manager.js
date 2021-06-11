@@ -7,6 +7,7 @@ function check_image() {
 
 
 function load_image(data) {
+    loadingIcon.classList.remove('invisible')
     if (!data.url) {
         setTimeout(check_image, 1000)
         return
@@ -20,7 +21,7 @@ function load_image(data) {
     time_end = eval(data.end)
     add_time_label()
     show_output_labels()
-    loadingIcon.classList.toggle('invisible')
+    loadingIcon.classList.add('invisible')
 }
 
 
@@ -35,6 +36,7 @@ function upload_files() {
     console.log(data)
     if (!data.get('csv') && !data.get('weight')) return go_to_next_page()
 
+    loadingIcon.classList.remove('invisible')
     $.ajax({
         // Your server script to process the upload
         url: '/upload',
@@ -68,5 +70,6 @@ function upload_files() {
 
 
 function go_to_next_page() {
+    loadingIcon.classList.add('invisible')
     $('form[name="main"]').submit()
 }
