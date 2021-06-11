@@ -130,6 +130,7 @@ function add_time_label() {
     const imgWidth = img.width
     let html = ''
     let time = new Date(time_start)
+    time.addMilliseconds(250)
     let totalWidth = 0
 
     if (imgWidth === 0) {

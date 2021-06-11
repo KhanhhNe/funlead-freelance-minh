@@ -152,15 +152,7 @@
                     </div>
                 </form>
                 <form name="main" method="get">
-                    <div class="output-label">Time start:</div>
-                    <span id="time-start"></span>
-                    <input type="hidden" name="time_start"><br/>
-                    <div class="output-label">Time end:</div>
-                    <span id="time-end"></span>
-                    <input type="hidden" name="time_end"><br/>
-                    <div class="output-label">Bit range:</div>
-                    <span id="bit-start"></span><input type="hidden" name="bit_start"> - <span id="bit-end"></span><input type="hidden" name="bit_end">
-                    <div class="input-group mt-2 mb-4">
+                    <div class="input-group mt-4 mb-2">
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1">Moving average</span>
                         </div>
@@ -168,6 +160,14 @@
                                aria-label="Moving average"
                                aria-describedby="basic-addon1" name="moving_average" value="{{ moving_average or 1 }}">
                     </div>
+                    <div class="output-label">Time start:</div>
+                    <span id="time-start"></span>
+                    <input type="hidden" name="time_start"><br/>
+                    <div class="output-label">Time end:</div>
+                    <span id="time-end"></span>
+                    <input type="hidden" name="time_end"><br/>
+                    <div class="output-label mb-4">Bit range:</div>
+                    <span id="bit-start"></span><input type="hidden" name="bit_start"> - <span id="bit-end"></span><input type="hidden" name="bit_end"><br/>
                     <button id="submit-btn" class="btn btn-success">Submit</button>
                     <a href="/" class="btn btn-warning">Reset</a>
                     <a href="/reset" class="btn btn-outline-danger">Restart</a>
