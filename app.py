@@ -92,11 +92,7 @@ def get_image():
 
 @app.route('/reset')
 def reset_data():
-    if os.path.exists('data.csv'):
-        os.remove('data.csv')
-    if os.path.exists('weight.csv'):
-        os.remove('weight.csv')
-    remove_previous_data()
+    remove_previous_data(remove_data_files=True)
     return redirect(url_for('select_route'))
 
 
