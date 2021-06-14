@@ -32,15 +32,15 @@ def select_route():
     bit_start = int(request.args.get('bit_start', '0'))
     bit_end = int(request.args.get('bit_end', '15'))
     moving_average = int(request.args.get('moving_average', '1'))
-    # img_path = f'static/imgs/{time.time()}.png'
-    # thread = threading.Thread(target=render_image, args=(
-    #     time_start_str, time_end_str,
-    #     bit_start, bit_end, moving_average,
-    #     img_path
-    # ))
-    # thread.start()
+    img_path = f'static/imgs/{time.time()}.png'
+    thread = threading.Thread(target=render_image, args=(
+        time_start_str, time_end_str,
+        bit_start, bit_end, moving_average,
+        img_path
+    ))
+    thread.start()
 
-    img_path = 'static/imgs/1623399829.6667395.png'
+    # img_path = 'static/imgs/1623399829.6667395.png'
 
     return render_template(
         'index.html', img=img_path, pixel_scale=PIXEL_SCALE,

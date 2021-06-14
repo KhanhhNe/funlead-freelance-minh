@@ -12,7 +12,7 @@
 
         .img-container {
             border: 3px solid black;
-            margin: 15px 20px 0px 15px;
+            margin: 15px 20px 0 15px;
             padding: 20px;
             border-radius: 10px;
             display: flex;
@@ -101,6 +101,21 @@
             padding: 5px 10px;
             margin: {{ pixel_scale }}px 0px 0px {{ pixel_scale }}px;
         }
+
+        .loading {
+            width: 100vw;
+            height: 100vh;
+            background: #b3d7ffb0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .spin {
+            width: 10rem;
+            height: 10rem;
+        }
     </style>
     <title>Tool</title>
 </head>
@@ -171,11 +186,13 @@
                     <button id="submit-btn" class="btn btn-success">Submit</button>
                     <a href="/" class="btn btn-warning">Reset</a>
                     <a href="/reset" class="btn btn-outline-danger">Restart</a>
-                    <span class="loading spinner-border spinner-border-sm ml-2"></span>
                 </form>
             </div>
         </div>
     </div>
+</div>
+<div class="loading d-flex justify-content-center">
+    <div class="spin mb-auto mt-auto spinner-border"></div>
 </div>
 
 <script src="/static/js/jquery.min.js"></script>
