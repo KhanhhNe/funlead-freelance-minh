@@ -122,16 +122,17 @@ def render_image(time_start_str, time_end_str, bit_start, bit_end, moving_averag
     json.dump(img_data, open('img_data.json', 'w+'))
 
 
-def remove_previous_data():
+def remove_previous_data(remove_data_files=False):
     with os.scandir(os.path.join(os.getcwd(), 'static', 'imgs')) as it:
         for entry in it:
             os.remove(entry.path)
     if os.path.exists('data.json'):
         os.remove('data.json')
-    if os.path.exists('data.csv'):
-        os.remove('data.csv')
-    if os.path.exists('weight.csv'):
-        os.remove('weight.csv')
+    if remove_data_files:
+        if os.path.exists('data.csv'):
+            os.remove('data.csv')
+        if os.path.exists('weight.csv'):
+            os.remove('weight.csv')
 
 
 def parse_time_str(time_str):
@@ -153,7 +154,7 @@ def disable_caching(response):
 
 
 if __name__ == '__main__':
-    remove_previous_data()
+    remove_previous_data(remove_data_files=True)
     app.run(debug=True)
     # Uncomment bellow lines and change port to an open port on machine to deploy on VPS
     # port = 8000

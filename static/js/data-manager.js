@@ -19,6 +19,7 @@ function load_image(data) {
     timeRange = data.width
     time_start = eval(data.start)
     time_end = eval(data.end)
+    time_start.addMilliseconds(250)
     add_time_label()
     show_output_labels()
     loadingIcon.classList.add('invisible')

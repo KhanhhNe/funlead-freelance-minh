@@ -126,7 +126,6 @@ function add_time_label() {
     const imgWidth = img.width
     let html = ''
     let time = new Date(time_start)
-    time.addMilliseconds(250)
     let totalWidth = 0
 
     if (imgWidth === 0) {
@@ -146,8 +145,8 @@ function add_time_label() {
         const style = offset_width ? `style="margin-left: ${offset_width - 0.15 * pixelScale}px"` : ''
         offset_width = 0
         html += `<span class="label-time" ${style}>${parse_time(time).split(' ')[1].split('.')[0]}</span>`
-        time.addSeconds(2)
-        totalWidth += pixelsPerSecond * 2 * pixelScale
+        time.addSeconds(1)
+        totalWidth += pixelsPerSecond * pixelScale
     }
     timeWrapper.innerHTML = html
 }
