@@ -121,10 +121,6 @@ function show_selection() {
     selection.style.width = `${left2 - left1 + pixelScale}px`
 }
 
-document.querySelector('input[type="file"]').oninput = function () {
-    document.querySelector(`label[for="${this.id}"]`).textContent = this.value
-}
-
 function add_time_label() {
     const timeWrapper = document.querySelector('.label-time-wrapper')
     const imgWidth = img.width

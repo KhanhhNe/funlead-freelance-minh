@@ -26,14 +26,18 @@ function load_image(data) {
 
 
 (() => {
-    check_image()
+    if (document.querySelector('.img-display')) {
+        check_image()
+    }
     document.getElementById('submit-btn').onclick = upload_files
+    $('form[name="files"]').submit(function (e) {
+        e.preventDefault()
+    })
 })()
 
 
 function upload_files() {
     const data = new FormData($('form[name="files"]')[0])
-    console.log(data)
     if (!data.get('csv') && !data.get('weight')) return go_to_next_page()
 
     loadingIcon.classList.remove('invisible')
@@ -61,7 +65,7 @@ function upload_files() {
                         console.log(`${e.loaded}/${e.total}`)
                     }
                 }, false);
-                myXhr.upload.addEventListener('load', go_to_next_page)
+                myXhr.upload.addEventListener('load', () => setTimeout(go_to_next_page, 1000))
             }
             return myXhr;
         }

@@ -142,7 +142,7 @@
         <div class="card-body">
             <h4 class="card-title">User input</h4>
             <div class="card-text">
-                <form name="files" method="post" enctype="multipart/form-data">
+                <form name="files" method="post" action="/upload" enctype="multipart/form-data">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="inputGroupFileAddon01">Hyper spectra data</span>
@@ -199,6 +199,11 @@
 <script src="/static/js/bootstrap.bundle.min.js"></script>
 <script src="/static/js/date.js"></script>
 <script>
+    for (let input of document.querySelectorAll('input[type="file"]')) {
+        input.oninput = function () {
+            document.querySelector(`label[for="${this.id}"]`).textContent = this.value
+        }
+    }
     const pixelScale = {{ pixel_scale }}
     const bit_start = {{ bit_start }}
     const bit_end = {{ bit_end }}
