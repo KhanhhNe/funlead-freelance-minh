@@ -51,9 +51,18 @@
                     </div>
                 </div>
                 </p>
-                <button id="submit-btn" class="btn btn-success">Submit</button>
             </form>
-            <form name="main" method="get" action="/"></form>
+            <form name="main" method="get" action="/">
+                <div class="input-group mt-4 mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Moving average</span>
+                    </div>
+                    <input type="number" class="form-control" placeholder="Moving average"
+                           aria-label="Moving average"
+                           aria-describedby="basic-addon1" name="moving_average" value="{{ moving_average or 1 }}">
+                </div>
+            </form>
+            <button id="submit-btn" class="btn btn-success">Submit</button>
         </div>
     </div>
 </div>

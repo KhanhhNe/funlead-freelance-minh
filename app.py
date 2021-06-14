@@ -128,6 +128,10 @@ def remove_previous_data():
             os.remove(entry.path)
     if os.path.exists('data.json'):
         os.remove('data.json')
+    if os.path.exists('data.csv'):
+        os.remove('data.csv')
+    if os.path.exists('weight.csv'):
+        os.remove('weight.csv')
 
 
 def parse_time_str(time_str):
@@ -149,6 +153,7 @@ def disable_caching(response):
 
 
 if __name__ == '__main__':
+    remove_previous_data()
     app.run(debug=True)
     # Uncomment bellow lines and change port to an open port on machine to deploy on VPS
     # port = 8000
