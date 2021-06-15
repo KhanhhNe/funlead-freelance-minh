@@ -39,7 +39,11 @@ function load_image(data) {
 
 function upload_files() {
     const data = new FormData($('form[name="files"]')[0])
-    if (!data.get('csv') && !data.get('weight')) return go_to_next_page()
+
+    if (!data.get('csv').name && !data.get('weight').name) {
+        go_to_next_page()
+        return false
+    }
 
     loadingIcon.classList.remove('invisible')
     $.ajax({
@@ -67,7 +71,7 @@ function upload_files() {
                     }
                 }, false);
                 myXhr.upload.addEventListener('load', () => setTimeout(function () {
-                    if (data.get('csv')) {
+                    if (data.get('csv').name) {
                         $('form[name="main"] input').remove()
                     }
                     go_to_next_page()
@@ -76,6 +80,7 @@ function upload_files() {
             return myXhr;
         }
     });
+    return false;
 }
 
 
