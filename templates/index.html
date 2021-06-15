@@ -145,7 +145,7 @@
         <div class="card-body">
             <h4 class="card-title">User input</h4>
             <div class="card-text">
-                <form name="files" method="post" action="/upload" enctype="multipart/form-data">
+                <form name="files" method="post" action="{{ url_for('upload_files') }}" enctype="multipart/form-data">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="inputGroupFileAddon01">Hyper spectra data</span>
@@ -169,7 +169,7 @@
                         </div>
                     </div>
                 </form>
-                <form name="main" method="get" action="/select">
+                <form name="main" method="get" action="{{ url_for('main_route') }}">
                     <div class="input-group mt-4 mb-2">
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1">Moving average</span>
@@ -187,8 +187,8 @@
                     <div class="output-label mb-4">Bit range:</div>
                     <span id="bit-start"></span><input type="hidden" name="bit_start"> - <span id="bit-end"></span><input type="hidden" name="bit_end"><br/>
                     <button id="submit-btn" class="btn btn-success">Submit</button>
-                    <a href="/" class="btn btn-warning">Reset</a>
-                    <a href="/reset" class="btn btn-outline-danger">Restart</a>
+                    <a href="{{ url_for('main_route') }}" class="btn btn-warning">Reset</a>
+                    <a href="{{ url_for('reset_data') }}" class="btn btn-outline-danger">Restart</a>
                 </form>
             </div>
         </div>

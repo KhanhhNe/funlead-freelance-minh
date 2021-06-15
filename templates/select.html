@@ -28,7 +28,7 @@
     <div class="card">
         <div class="card-body">
             <h4 class="card-title">User input</h4>
-            <form name="files" method="post" action="/upload" enctype="multipart/form-data">
+            <form name="files" method="post" action="{{ url_for('upload_files') }}" enctype="multipart/form-data">
                 <p class="card-text">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
@@ -52,7 +52,7 @@
                 </div>
                 </p>
             </form>
-            <form name="main" method="get" action="/select">
+            <form name="main" method="get" action="{{ url_for('main_route') }}">
                 <div class="input-group mt-4 mb-2">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon1">Moving average</span>
