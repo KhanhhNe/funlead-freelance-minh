@@ -68,10 +68,9 @@ function upload_files() {
                 }, false);
                 myXhr.upload.addEventListener('load', () => setTimeout(function () {
                     if (data.get('csv')) {
-                        window.location.replace('/select')
-                    } else {
-                        go_to_next_page()
+                        $('form[name="main"] input').remove()
                     }
+                    go_to_next_page()
                 }, 1000))
             }
             return myXhr;
