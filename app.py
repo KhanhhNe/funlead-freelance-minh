@@ -15,13 +15,18 @@ PIXEL_SCALE = 10
 
 @app.route('/')
 def select_route():
+    return render_template('select.html')
+
+
+@app.route('/select')
+def main_route():
+    if not os.path.exists('data.csv') or not os.path.exists('weight.csv'):
+        return redirect(url_for('select_route'))
+
     try:
         file_data = json.load(open('data.json'))
     except OSError:
         file_data = {}
-
-    if not os.path.exists('data.csv') or not os.path.exists('weight.csv'):
-        return render_template('select.html')
 
     time_start_str, time_end_str = 0, 0
     if request.args.get('time_start'):
