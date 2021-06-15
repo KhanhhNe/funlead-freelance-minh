@@ -72,7 +72,7 @@ function upload_files() {
                 }, false);
                 myXhr.upload.addEventListener('load', () => setTimeout(function () {
                     if (data.get('csv').name) {
-                        $('form[name="main"] input').remove()
+                        $('form[name="main"] input:not([name="moving_average"])').remove()
                     }
                     go_to_next_page()
                 }, 1000))
