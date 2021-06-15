@@ -66,13 +66,13 @@ function upload_files() {
                         console.log(`${e.loaded}/${e.total}`)
                     }
                 }, false);
-                myXhr.upload.addEventListener('load', function () {
+                myXhr.upload.addEventListener('load', () => setTimeout(function () {
                     if (data.get('csv')) {
                         window.location.replace('/select')
                     } else {
                         go_to_next_page()
                     }
-                })
+                }, 1000))
             }
             return myXhr;
         }

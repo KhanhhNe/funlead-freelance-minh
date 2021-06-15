@@ -111,6 +111,12 @@ document.onmousemove = function (e) {
 }
 
 
+const imgOverlay = document.getElementById('overlay-img')
+imgDisplay.onscroll = function () {
+    imgOverlay.style.marginLeft = '-' + this.scrollLeft + 'px'
+}
+
+
 function show_selection() {
     const compareFunc = (a, b) => a - b
     const [top1, top2] = [parseInt(div1.style.marginTop), parseInt(div2.style.marginTop)].sort(compareFunc);
