@@ -113,14 +113,13 @@ def render_image(time_start_str, time_end_str, bit_start, bit_end, moving_averag
         bitstart=bit_start, bitend=bit_end, average=moving_average
     )
     img2 = Image.fromarray(data_array)
-    os.makedirs(os.path.dirname(img_path), exist_ok=True)
-    img2.save(img_path)
     img_data[img_path] = {
         'start': parse_time_str(start_time),
         'end': parse_time_str(end_time)
     }
-
     json.dump(img_data, open('img_data.json', 'w+'))
+    os.makedirs(os.path.dirname(img_path), exist_ok=True)
+    img2.save(img_path)
 
 
 def remove_previous_data(remove_data_files=False):

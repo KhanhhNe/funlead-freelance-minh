@@ -13,8 +13,10 @@ const movingAverage = document.querySelector('input[name="moving_average"]')
 const popup = document.getElementById('popup')
 const popupBit = popup.querySelector('#popup-bit')
 const popupTime = popup.querySelector('#popup-time')
+const form = document.forms.main
 
-let selecting = false;
+let selecting = false
+let current_time, current_bit
 
 function inside_elem(event, elem) {
     const rect = elem.getBoundingClientRect()
@@ -54,43 +56,24 @@ function parse_time(time) {
     return (`${time.toString('u')}.${String(roundedMillis)[0]}`).replace('Z', '')
 }
 
-function compute_output() {
-    let {top, left, bottom, right} = selection.getBoundingClientRect()
-    const displayRect = imgDisplay.getBoundingClientRect()
-    left += imgDisplay.scrollLeft - displayRect.x
-    right += imgDisplay.scrollLeft - displayRect.x
-    top += imgDisplay.scrollTop - displayRect.y
-    bottom += imgDisplay.scrollTop - displayRect.y
-
-    let bit = {
-        start: bit_start + Math.trunc(top / pixelScale),
-        end: bit_start + Math.trunc(bottom / pixelScale - 1)
-    }
-    let time = {
-        start: (new Date(time_start)).addMilliseconds(left / pixelScale / pixelsPerSecond * 1000),
-        end: (new Date(time_start)).addMilliseconds((right / pixelScale - 1) / pixelsPerSecond * 1000)
-    }
-    const form = document.forms.main
-    bitStart.innerText = form.bit_start.value = String(bit.start)
-    bitEnd.innerText = form.bit_end.value = String(bit.end)
-    timeStart.innerText = form.time_start.value = parse_time(time.start)
-    timeEnd.innerText = form.time_end.value = parse_time(time.end)
-}
-
 document.onclick = function (e) {
     if (inside_elem(e, img)) {
+        const date = time_start
         if (!selecting) {
             set_pixel_pos(e, div1)
-            selection.style.width = '0px'
-        } else {
             set_pixel_pos(e, div2)
             show_selection()
-            compute_output()
+
+            bitStart.innerText = form.bit_start.value = String(current_bit)
+            timeStart.innerText = form.time_start.value = parse_time(current_time)
+        } else {
+            bitEnd.innerText = form.bit_end.value = String(current_bit)
+            timeEnd.innerText = form.time_end.value = parse_time(current_time)
         }
         selecting = !selecting
     }
 }
-
+// TODO rely on mouse move
 document.onmousemove = function (e) {
     if (selecting) {
         set_pixel_pos(e, div2)
@@ -100,10 +83,12 @@ document.onmousemove = function (e) {
     if (inside_elem(e, img)) {
         popup.style.display = 'block'
         const offset = offset_with_elem(e, imgDisplay)
-        const time = new Date(time_start)
-        time.addSeconds(Math.trunc(offset.x / pixelScale) / pixelsPerSecond)
-        popupTime.textContent = parse_time(time).split(' ')[1]
-        popupBit.textContent = `${Math.trunc(offset.y / pixelScale) + bit_start}`
+        current_time = new Date(time_start)
+        current_time.addSeconds(Math.trunc(offset.x / pixelScale) / pixelsPerSecond)
+        current_bit = Math.trunc(offset.y / pixelScale) + bit_start
+
+        popupTime.textContent = parse_time(current_time).split(' ')[1]
+        popupBit.textContent = `${current_bit}`
         set_pixel_pos(e, popup, 10, 10)
     } else {
         popup.style.display = 'none'
