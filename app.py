@@ -123,9 +123,10 @@ def render_image(time_start_str, time_end_str, bit_start, bit_end, moving_averag
 
 
 def remove_previous_data(remove_data_files=False):
-    with os.scandir(os.path.join(os.getcwd(), 'static', 'imgs')) as it:
-        for entry in it:
-            os.remove(entry.path)
+    if os.path.exists('static/imgs'):
+        with os.scandir('static/imgs') as it:
+            for entry in it:
+                os.remove(entry.path)
     if os.path.exists('data.json'):
         os.remove('data.json')
     if remove_data_files:
