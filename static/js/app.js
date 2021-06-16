@@ -58,7 +58,6 @@ function parse_time(time) {
 
 document.onclick = function (e) {
     if (inside_elem(e, img)) {
-        const date = time_start
         if (!selecting) {
             set_pixel_pos(e, div1)
             set_pixel_pos(e, div2)
@@ -66,6 +65,8 @@ document.onclick = function (e) {
 
             bitStart.innerText = form.bit_start.value = String(current_bit)
             timeStart.innerText = form.time_start.value = parse_time(current_time)
+            bitEnd.innerText = form.bit_end.value = ''
+            timeEnd.innerText = form.time_end.value = ''
         } else {
             bitEnd.innerText = form.bit_end.value = String(current_bit)
             timeEnd.innerText = form.time_end.value = parse_time(current_time)
