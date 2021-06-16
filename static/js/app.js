@@ -68,8 +68,14 @@ document.onclick = function (e) {
             bitEnd.innerText = form.bit_end.value = ''
             timeEnd.innerText = form.time_end.value = ''
         } else {
-            bitEnd.innerText = form.bit_end.value = String(current_bit)
-            timeEnd.innerText = form.time_end.value = parse_time(current_time)
+            const bit = {}, time = {};
+            [bit.start, bit.end] = [bitStart.innerText.padStart(2, '0'), String(current_bit).padStart(2, '0')].sort();
+            [time.start, time.end] = [timeStart.innerText, parse_time(current_time)].sort();
+
+            bitStart.innerText = form.bit_start.value = bit.start.replace(/^0(?=.)/g, '')
+            timeStart.innerText = form.time_start.value = time.start
+            bitEnd.innerText = form.bit_end.value = bit.end.replace(/^0(?=.)/g, '')
+            timeEnd.innerText = form.time_end.value = time.end
         }
         selecting = !selecting
     }
