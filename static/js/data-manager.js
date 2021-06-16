@@ -19,7 +19,13 @@ function load_image(data) {
     timeRange = data.width
     time_start = eval(data.start)
     time_end = eval(data.end)
-    time_start.addMilliseconds(250)
+    if (time_start.getMilliseconds() < 250) time_start.setMilliseconds(250)
+    else if (time_start.getMilliseconds() < 500) time_start.setMilliseconds(500)
+    else if (time_start.getMilliseconds() < 750) time_start.setMilliseconds(750)
+    else {
+        time_start.setMilliseconds(0)
+        time_start.addSeconds(1)
+    }
     add_time_label()
     show_output_labels()
     loadingIcon.classList.add('invisible')

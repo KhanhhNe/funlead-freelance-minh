@@ -52,8 +52,8 @@ function parse_time(time) {
     if (time.getMilliseconds() % 250) {
         roundedMillis = (time.getMilliseconds() + 250 - time.getMilliseconds() % 250) % 1000
     }
-    roundedMillis = Math.ceil(roundedMillis / 100) * 100
-    return (`${time.toString('u')}.${String(roundedMillis)[0]}`).replace('Z', '')
+    // roundedMillis = Math.ceil(roundedMillis / 100) * 100
+    return `${time.toString('u')}.${String(roundedMillis).replace(/0+/, '').padEnd(1, '0')}`.replace('Z', '')
 }
 
 document.onclick = function (e) {
@@ -80,7 +80,7 @@ document.onclick = function (e) {
         selecting = !selecting
     }
 }
-// TODO rely on mouse move
+
 document.onmousemove = function (e) {
     if (selecting) {
         set_pixel_pos(e, div2)
