@@ -82,15 +82,18 @@ def upload_files():
 def get_image():
     img_path = request.args.get('img_url', '')
     if os.path.exists(img_path):
-        img_data = json.load(open('img_data.json'))
-        w, h = Image.open(img_path.lstrip('/')).size
-        return json.dumps({
-            'url': img_path,
-            'width': w,
-            'height': h,
-            'start': img_data.get(img_path, {}).get('start'),
-            'end': img_data.get(img_path, {}).get('end')
-        })
+        try:
+            img_data = json.load(open('img_data.json'))
+            w, h = Image.open(img_path.lstrip('/')).size
+            return json.dumps({
+                'url': img_path,
+                'width': w,
+                'height': h,
+                'start': img_data.get(img_path, {}).get('start'),
+                'end': img_data.get(img_path, {}).get('end')
+            })
+        except:
+            return '{}'
     else:
         return '{}'
 
