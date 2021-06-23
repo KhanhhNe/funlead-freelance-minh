@@ -9,7 +9,7 @@ function check_image() {
 function load_image(data) {
     loadingIcon.classList.remove('invisible')
 
-    if (!data.success) {
+    if (data.success === false) {
         loadingIcon.classList.add('invisible')
         alert("There is some problem with CSV file.")
         return
