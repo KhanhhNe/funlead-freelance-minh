@@ -3,6 +3,7 @@ import os
 import re
 import threading
 import time
+from traceback import print_exc
 
 from PIL import Image
 from flask import Flask, render_template, send_from_directory, request, url_for, redirect
@@ -84,8 +85,14 @@ def get_image():
     if os.path.exists(img_path):
         try:
             img_data = json.load(open('img_data.json'))
+            if img_data.get(img_path) is None:
+                return json.dumps({
+                    'success': False
+                })
+
             w, h = Image.open(img_path.lstrip('/')).size
             return json.dumps({
+                'success': True,
                 'url': img_path,
                 'width': w,
                 'height': h,
@@ -93,9 +100,8 @@ def get_image():
                 'end': img_data.get(img_path, {}).get('end')
             })
         except:
-            return '{}'
-    else:
-        return '{}'
+            pass
+    return '{}'
 
 
 @app.route('/reset')
@@ -110,19 +116,25 @@ def render_image(time_start_str, time_end_str, bit_start, bit_end, moving_averag
     except FileNotFoundError:
         img_data = {}
 
-    data_array, _, _, start_time, end_time, _ = funlead.performPCA(
-        'data.csv', 'weight.csv',
-        start_time=time_start_str, end_time=time_end_str,
-        bitstart=bit_start, bitend=bit_end, average=moving_average
-    )
-    img2 = Image.fromarray(data_array)
-    img_data[img_path] = {
-        'start': parse_time_str(start_time),
-        'end': parse_time_str(end_time)
-    }
-    json.dump(img_data, open('img_data.json', 'w+'))
-    os.makedirs(os.path.dirname(img_path), exist_ok=True)
-    img2.save(img_path)
+    try:
+        data_array, _, _, start_time, end_time, _ = funlead.performPCA(
+            'data.csv', 'weight.csv',
+            start_time=time_start_str, end_time=time_end_str,
+            bitstart=bit_start, bitend=bit_end, average=moving_average
+        )
+        img2 = Image.fromarray(data_array)
+        img_data[img_path] = {
+            'start': parse_time_str(start_time),
+            'end': parse_time_str(end_time)
+        }
+        json.dump(img_data, open('img_data.json', 'w+'))
+        os.makedirs(os.path.dirname(img_path), exist_ok=True)
+        img2.save(img_path)
+    except:
+        open(img_path, 'w+').write('')
+        print_exc()
+    finally:
+        json.dump(img_data, open('img_data.json', 'w+'))
 
 
 def remove_previous_data(remove_data_files=False):
