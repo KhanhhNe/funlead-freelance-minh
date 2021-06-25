@@ -11,7 +11,7 @@ function load_image(data) {
 
     if (data.success === false) {
         loadingIcon.classList.add('invisible')
-        alert("There is some problem with CSV file.")
+        alert(data.message)
         return
     }
 

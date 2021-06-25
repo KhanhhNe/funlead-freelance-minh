@@ -3,7 +3,7 @@ import os
 import re
 import threading
 import time
-from traceback import print_exc
+from traceback import print_exc, format_exc
 
 from PIL import Image
 from flask import Flask, render_template, send_from_directory, request, url_for, redirect
@@ -85,9 +85,10 @@ def get_image():
     if os.path.exists(img_path):
         try:
             img_data = json.load(open('img_data.json'))
-            if img_data.get(img_path) is None:
+            if isinstance(img_data.get(img_path), dict) is False:
                 return json.dumps({
-                    'success': False
+                    'success': False,
+                    'message': img_data[img_path]
                 })
 
             w, h = Image.open(img_path.lstrip('/')).size
@@ -132,9 +133,9 @@ def render_image(time_start_str, time_end_str, bit_start, bit_end, moving_averag
         img2.save(img_path)
     except:
         open(img_path, 'w+').write('')
-        print_exc()
-    finally:
-        json.dump(img_data, open('img_data.json', 'w+'))
+        img_data[img_path] = format_exc()
+
+    json.dump(img_data, open('img_data.json', 'w+'))
 
 
 def remove_previous_data(remove_data_files=False):
