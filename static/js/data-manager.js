@@ -11,7 +11,7 @@ function load_image(data) {
 
     if (data.success === false) {
         loadingIcon.classList.add('invisible')
-        alert(data.message)
+        alert(`There was an error processing:\n${data.message}`)
         return
     }
 
