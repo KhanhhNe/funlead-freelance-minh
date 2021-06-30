@@ -9,7 +9,6 @@ const bitStart = document.getElementById('bit-start')
 const bitEnd = document.getElementById('bit-end')
 const timeStart = document.getElementById('time-start')
 const timeEnd = document.getElementById('time-end')
-const movingAverage = document.querySelector('input[name="moving_average"]')
 const popup = document.getElementById('popup')
 const popupBit = popup.querySelector('#popup-bit')
 const popupTime = popup.querySelector('#popup-time')
@@ -48,12 +47,7 @@ function set_pixel_pos(event, elem, offsetX = 0, offsetY = 0) {
 }
 
 function parse_time(time) {
-    let roundedMillis = time.getMilliseconds()
-    if (time.getMilliseconds() % 250) {
-        roundedMillis = (time.getMilliseconds() + 250 - time.getMilliseconds() % 250) % 1000
-    }
-    // roundedMillis = Math.ceil(roundedMillis / 100) * 100
-    return `${time.toString('u')}.${String(roundedMillis).replace(/0+/, '').padEnd(1, '0')}`.replace('Z', '')
+    return `${time.toString('u')}.${Math.trunc(time.getMilliseconds() / 100)}`.replace('Z', '')
 }
 
 document.onclick = function (e) {
@@ -90,12 +84,12 @@ document.onmousemove = function (e) {
     if (inside_elem(e, img)) {
         popup.style.display = 'block'
         const offset = offset_with_elem(e, imgDisplay)
-        current_time = new Date(time_start)
-        current_time.addSeconds(Math.trunc(offset.x / pixelScale) / pixelsPerSecond)
-        current_bit = Math.trunc(offset.y / pixelScale) + bit_start
+        current_bit = Math.min(Math.trunc(offset.y / pixelScale) + bit_start, bit_end)
+        const time_str = time_map[current_bit][Math.trunc(offset.x / pixelScale)]
+        current_time = new Date(`${parse_time(time_start).split(' ')[0]} ${time_str}`)
 
-        popupTime.textContent = parse_time(current_time).split(' ')[1]
-        popupBit.textContent = `${current_bit}`
+        popupTime.textContent = time_str
+        popupBit.textContent = current_bit
         set_pixel_pos(e, popup, 10, 10)
     } else {
         popup.style.display = 'none'
@@ -119,32 +113,18 @@ function show_selection() {
     selection.style.width = `${left2 - left1 + pixelScale}px`
 }
 
-function add_time_label() {
+
+function add_time_label(labels, labels_pos) {
     const timeWrapper = document.querySelector('.label-time-wrapper')
-    const imgWidth = img.width
     let html = ''
-    let time = new Date(time_start)
-    let totalWidth = 0
+    let previous = 1
 
-    if (imgWidth === 0) {
-        setTimeout(add_time_label)
-        return
-    }
+    for (let ind = 0; ind < labels.length; ind++) {
+        const margin_left = (labels_pos[ind] - previous) * pixelScale
+        const style = `style="margin-left: ${margin_left}px"`
+        html += `<span class="label-time" ${style}>${labels[ind]}</span>`
 
-    let offset_width = 0
-    if (time.getMilliseconds()) {
-        const offset_millis = 1000 - time.getMilliseconds() % 1000;
-        offset_width = offset_millis / 1000 * pixelsPerSecond * pixelScale
-        time.addMilliseconds(offset_millis)
-        totalWidth += offset_width
-    }
-
-    while (totalWidth < imgWidth) {
-        const style = offset_width ? `style="margin-left: ${offset_width - 0.15 * pixelScale}px"` : ''
-        offset_width = 0
-        html += `<span class="label-time" ${style}>${parse_time(time).split(' ')[1].split('.')[0]}</span>`
-        time.addSeconds(1)
-        totalWidth += pixelsPerSecond * pixelScale
+        previous = labels_pos[ind]
     }
     timeWrapper.innerHTML = html
 }

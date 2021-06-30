@@ -46,7 +46,7 @@ def main_route():
     ))
     thread.start()
 
-    # img_path = 'static/imgs/1623399829.6667395.png'
+    # img_path = 'static/imgs/1625025676.9899454.png'
 
     return render_template(
         'index.html', img=img_path, pixel_scale=PIXEL_SCALE,
@@ -92,14 +92,13 @@ def get_image():
                 })
 
             w, h = Image.open(img_path.lstrip('/')).size
-            return json.dumps({
-                'success': True,
-                'url': img_path,
-                'width': w,
-                'height': h,
-                'start': img_data.get(img_path, {}).get('start'),
-                'end': img_data.get(img_path, {}).get('end')
-            })
+            return json.dumps(dict(
+                success=True,
+                url=img_path,
+                width=w,
+                height=h,
+                **img_data[img_path]
+            ))
         except:
             pass
     return '{}'
@@ -118,7 +117,7 @@ def render_image(time_start_str, time_end_str, bit_start, bit_end, moving_averag
         img_data = {}
 
     try:
-        data_array, _, _, start_time, end_time, _ = funlead.performPCA(
+        data_array, time_map, x_labels, x_pos, start_time, end_time, moving_average = funlead.performPCA(
             'data.csv', 'weight.csv',
             start_time=time_start_str, end_time=time_end_str,
             bitstart=bit_start, bitend=bit_end, average=moving_average
@@ -126,7 +125,10 @@ def render_image(time_start_str, time_end_str, bit_start, bit_end, moving_averag
         img2 = Image.fromarray(data_array)
         img_data[img_path] = {
             'start': parse_time_str(start_time),
-            'end': parse_time_str(end_time)
+            'end': parse_time_str(end_time),
+            'labels': x_labels,
+            'labels_pos': x_pos,
+            'time_map': time_map
         }
         json.dump(img_data, open('img_data.json', 'w+'))
         os.makedirs(os.path.dirname(img_path), exist_ok=True)
@@ -172,7 +174,4 @@ def disable_caching(response):
 
 if __name__ == '__main__':
     remove_previous_data(remove_data_files=True)
-    app.run(debug=True)
-    # Uncomment bellow lines and change port to an open port on machine to deploy on VPS
-    # port = 8000
-    # app.run('0.0.0.0', port)
+    app.run('0.0.0.0', port=5000, debug=True)
