@@ -3,7 +3,7 @@ import os
 import re
 import threading
 import time
-from traceback import print_exc, format_exc
+from traceback import format_exc
 
 from PIL import Image
 from flask import Flask, render_template, send_from_directory, request, url_for, redirect

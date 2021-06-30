@@ -67,7 +67,8 @@
         .label-time {
             display: block;
             writing-mode: vertical-lr;
-            line-height: 10px;
+            width: {{ pixel_scale }}px;
+            line-height: {{ pixel_scale }}px;
             font-size: 16px;
         }
 
@@ -75,7 +76,8 @@
             content: "=";
             color: red;
             text-shadow: 1px 1px 3px black;
-            line-height: 16px;
+            height: {{ pixel_scale }}px;
+            line-height: {{ pixel_scale }}px;
             font-size: 16px;
         }
 

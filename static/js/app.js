@@ -12,6 +12,7 @@ const timeEnd = document.getElementById('time-end')
 const popup = document.getElementById('popup')
 const popupBit = popup.querySelector('#popup-bit')
 const popupTime = popup.querySelector('#popup-time')
+const timeWrapper = document.querySelector('.label-time-wrapper')
 const form = document.forms.main
 
 let selecting = false
@@ -115,14 +116,13 @@ function show_selection() {
 
 
 function add_time_label(labels, labels_pos) {
-    const timeWrapper = document.querySelector('.label-time-wrapper')
     let html = ''
-    let previous = 1
+    let previous = 0
 
     for (let ind = 0; ind < labels.length; ind++) {
-        const margin_left = (labels_pos[ind] - previous) * pixelScale
+        const margin_left = Math.max(0, labels_pos[ind] - previous - 1) * pixelScale
         const style = `style="margin-left: ${margin_left}px"`
-        html += `<span class="label-time" ${style}>${labels[ind]}</span>`
+        html += `<span class="label-time" ${style}">${labels[ind]}</span>`
 
         previous = labels_pos[ind]
     }

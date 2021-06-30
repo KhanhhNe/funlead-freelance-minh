@@ -22,7 +22,7 @@ function load_image(data) {
 
     const inputImg = document.querySelector('.input-img')
     inputImg.src = data.url
-    inputImg.style.width = `${data.width * pixelScale}px`
+    timeWrapper.style.width = inputImg.style.width = `${data.width * pixelScale}px`
     inputImg.style.height = `${data.height * pixelScale}px`
     timeRange = data.width
     time_start = eval(data.start)
