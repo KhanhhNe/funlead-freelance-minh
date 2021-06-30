@@ -17,6 +17,17 @@ const form = document.forms.main
 
 let selecting = false
 let current_time, current_bit
+let current_x, current_y
+let selected = {
+    x: {
+        start: -1,
+        end: -1
+    },
+    y: {
+        start: -1,
+        end: -1
+    },
+}
 
 function inside_elem(event, elem) {
     const rect = elem.getBoundingClientRect()
@@ -56,20 +67,30 @@ document.onclick = function (e) {
         if (!selecting) {
             set_pixel_pos(e, div1)
             set_pixel_pos(e, div2)
+            selected.x.start = current_x
+            selected.y.start = current_y
             show_selection()
 
-            bitStart.innerText = form.bit_start.value = String(current_bit)
+            bitStart.innerText = form.bit_start.value = current_bit
             timeStart.innerText = form.time_start.value = parse_time(current_time)
             bitEnd.innerText = form.bit_end.value = ''
             timeEnd.innerText = form.time_end.value = ''
         } else {
-            const bit = {}, time = {};
-            [bit.start, bit.end] = [bitStart.innerText.padStart(2, '0'), String(current_bit).padStart(2, '0')].sort();
-            [time.start, time.end] = [timeStart.innerText, parse_time(current_time)].sort();
+            [selected.x.start, selected.x.end] = [selected.x.start, current_x].sort();
+            [selected.y.start, selected.y.end] = [selected.y.start, current_y].sort();
 
-            bitStart.innerText = form.bit_start.value = bit.start.replace(/^0(?=.)/g, '')
+            const bit = {
+                start: selected.x.start + bit_start,
+                end: selected.x.end + bit_end
+            }
+            const time = {
+                start: `${parse_time(time_start).split(' ')[0]} ${time_map[selected.y.start][selected.x.start]}`,
+                end: `${parse_time(time_start).split(' ')[0]} ${time_map[selected.y.end][selected.x.end]}`,
+            }
+
+            bitStart.innerText = form.bit_start.value = bit.start
             timeStart.innerText = form.time_start.value = time.start
-            bitEnd.innerText = form.bit_end.value = bit.end.replace(/^0(?=.)/g, '')
+            bitEnd.innerText = form.bit_end.value = bit.end
             timeEnd.innerText = form.time_end.value = time.end
         }
         selecting = !selecting
@@ -88,6 +109,9 @@ document.onmousemove = function (e) {
         current_bit = Math.min(Math.trunc(offset.y / pixelScale) + bit_start, bit_end)
         const time_str = time_map[current_bit][Math.trunc(offset.x / pixelScale)]
         current_time = new Date(`${parse_time(time_start).split(' ')[0]} ${time_str}`)
+
+        current_y = Math.min(Math.trunc(offset.y / pixelScale), bit_end - bit_start + 1)
+        current_x = Math.trunc(offset.x / pixelScale)
 
         popupTime.textContent = time_str
         popupBit.textContent = current_bit
