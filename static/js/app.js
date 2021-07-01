@@ -80,8 +80,8 @@ document.onclick = function (e) {
             [selected.y.start, selected.y.end] = [selected.y.start, current_y].sort();
 
             const bit = {
-                start: selected.x.start + bit_start,
-                end: selected.x.end + bit_end
+                start: selected.y.start + bit_start,
+                end: selected.y.end + bit_start
             }
             const time = {
                 start: `${parse_time(time_start).split(' ')[0]} ${time_map[selected.y.start][selected.x.start]}`,
