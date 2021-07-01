@@ -76,8 +76,8 @@ document.onclick = function (e) {
             bitEnd.innerText = form.bit_end.value = ''
             timeEnd.innerText = form.time_end.value = ''
         } else {
-            [selected.x.start, selected.x.end] = [selected.x.start, current_x].sort();
-            [selected.y.start, selected.y.end] = [selected.y.start, current_y].sort();
+            [selected.x.start, selected.x.end] = [selected.x.start, current_x].sort((a, b) => a - b);
+            [selected.y.start, selected.y.end] = [selected.y.start, current_y].sort((a, b) => a - b);
 
             const bit = {
                 start: selected.y.start + bit_start,
