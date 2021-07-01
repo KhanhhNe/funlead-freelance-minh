@@ -29,6 +29,15 @@ def main_route():
     except OSError:
         file_data = {}
 
+    if request.args.get('reset'):
+        if file_data.get('prev_weight'):
+            file_data['weight'] = file_data['prev_weight']
+            del file_data['prev_weight']
+            if os.path.exists('weight.csv'):
+                os.remove('weight.csv')
+            os.rename('prev_weight.csv', 'weight.csv')
+            json.dump(file_data, open('data.json', 'w+'))
+
     time_start_str, time_end_str = 0, 0
     if request.args.get('time_start'):
         time_start_str = request.args['time_start'].split()[1]
@@ -70,6 +79,12 @@ def upload_files():
         remove_previous_data()
 
     if request.files.get('weight'):
+        if os.path.exists('weight.csv'):
+            if os.path.exists('prev_weight.csv'):
+                os.remove('prev_weight.csv')
+            os.rename('weight.csv', 'prev_weight.csv')
+            file_data['prev_weight'] = file_data['weight']
+
         weight_file = request.files['weight']
         file_data['weight'] = weight_file.filename
         weight_file.save('weight.csv')
@@ -152,6 +167,8 @@ def remove_previous_data(remove_data_files=False):
             os.remove('data.csv')
         if os.path.exists('weight.csv'):
             os.remove('weight.csv')
+        if os.path.exists('prev_weight.csv'):
+            os.remove('prev_weight.csv')
 
 
 def parse_time_str(time_str):

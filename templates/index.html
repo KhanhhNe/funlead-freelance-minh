@@ -187,7 +187,7 @@
                     <div class="output-label mb-4">Bit range:</div>
                     <span id="bit-start"></span><input type="hidden" name="bit_start"> - <span id="bit-end"></span><input type="hidden" name="bit_end"><br/>
                     <button id="submit-btn" class="btn btn-success">Submit</button>
-                    <a href="{{ url_for('main_route') }}" class="btn btn-warning">Reset</a>
+                    <a href="{{ url_for('main_route') }}?reset=1" class="btn btn-warning">Reset</a>
                     <a href="{{ url_for('reset_data') }}" class="btn btn-outline-danger">Restart</a>
                 </form>
             </div>
