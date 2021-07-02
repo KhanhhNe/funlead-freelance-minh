@@ -12,6 +12,16 @@ import math
 # start time must be in format 14:50:20.1
 #
 def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitstart=0, bitend=15, bandstart=13, bandend=115, vidnum=1):
+
+    print(f'csvfile {csvfile}')
+    print(f'weightsfile {weightsfile}')
+    print(f'average {average}')
+    print(f'start_time {start_time}')
+    print(f'end_time {end_time}')
+    print(f'bitstart {bitstart}')
+    print(f'bitend {bitend}')
+
+
     # config for which dimensions to start and end for, this value can be narrowed.
     # 13 is the minimum starting point
     # if from dimension 5 is required, add 5 to the START param
@@ -37,6 +47,8 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
     df_cut = df_cut.set_index(['time'])
     df_orig = df_orig.set_index(['time'])
 
+    print(f'df_orig {len(df_orig)}')
+
     #if start_time == 0 then get the default start and end time of the whole datafram
     starttimemicroseconds = 0
     endtimemicroseconds = 0
@@ -45,7 +57,7 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
         start_time = df_orig.iloc[0].name.strftime('%Y-%m-%d %H:%M:%S')
         # start_time = "2020-01-15 14:16:00"
         #TODO get the end time
-        end_time = df_orig.iloc[len(df_orig) - 1].name.strftime('%Y-%m-%d %H:%M:%S')
+        end_time = df_orig.iloc[len(df_orig) - 1].name.strftime('%Y-%m-%d %H:%M:%S.%f')[:-5]
 
         # end_time = "2020-01-15 14:20:00"
     else:
@@ -54,10 +66,19 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
         start_time = date +" " + start_time
         end_time = date + " " + end_time
 
+    print(f'df_cut {len(df_cut)}')
 
     df_cut_withpixelindex = df_cut[(df_cut.index >=start_time) & (df_cut.index <=end_time) ]
+
+    print(f'df_cut[(df_cut.index < start_time)]) {len(df_cut[(df_cut.index < start_time)])}')
+    print(f'df_cut[(df_cut.index <=end_time)) {len(df_cut[(df_cut.index >end_time)])}')
+
+    print(f'df_cut_withpixelindex {len(df_cut_withpixelindex)}')
+
     #drop pixelindex for now and add it later
     df_cut_temp = df_cut_withpixelindex.drop(["pixelindex"], axis=1)
+
+    print(f'df_cut_temp {len(df_cut_temp)}')
 
     #apply moving average:
     if average > 1:
@@ -69,12 +90,15 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
         df_cut_withpixelindex = df_cut_withpixelindex.iloc[average-1:]
         df_cut_temp = df_cut_temp.iloc[average-1:]
 
+    print(f'df_cut_temp after average {len(df_cut_temp)}')
+
     #apply weights
     df_weights_cut = df_weight.loc[:, START:END]
     for index, value in enumerate(df_weights_cut.values[0]):
         # print(index)
         df_cut_temp[START + index] = df_cut_temp[START + index] * value
 
+    print(f'df_cut_temp after weights {len(df_cut_temp)}')
 
     # construct PCA
     pca = PCA(n_components=3)
@@ -96,6 +120,8 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
     df_scaled = df_scaled.set_index(['time'])
     df_scaled['pixelindex'] = df_cut_withpixelindex["pixelindex"]
 
+    print(f'df_scaled {len(df_scaled)}')
+
     firstindex = 0
     for i in range(0, 16):
         if df_scaled.iloc[i]['pixelindex'] == 0:
@@ -104,13 +130,14 @@ def performPCA(csvfile, weightsfile, average=1, start_time=0, end_time=0, bitsta
     # start the image with 0 index because sometimes when you cut, the first row might not be sensor 0
     df_scaled_temp = df_scaled.iloc[firstindex:]
 
+    print(f'df_scaled_temp {len(df_scaled_temp)}')
+
     # create image
     width = math.ceil(len(df_scaled_temp) / 16)
     rgbArray = np.zeros([16, width, 3], dtype=np.uint8)
     # timeMap = np.chararray([16, width])
     timeMap = [[0 for x in range(width)] for y in range(16)]
     # timeMap= [[0] * width] * 16
-
 
     print(f'length of width: {width}')
 
