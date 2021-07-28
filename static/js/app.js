@@ -107,7 +107,7 @@ document.onmousemove = function (e) {
         popup.style.display = 'block'
         const offset = offset_with_elem(e, imgDisplay)
         current_bit = Math.min(Math.trunc(offset.y / pixelScale) + bit_start, bit_end)
-        const time_str = time_map[current_bit][Math.trunc(offset.x / pixelScale)]
+        const time_str = time_map[current_bit - bit_start][Math.trunc(offset.x / pixelScale)]
         current_time = new Date(`${parse_time(time_start).split(' ')[0]} ${time_str}`)
 
         current_y = Math.min(Math.trunc(offset.y / pixelScale), bit_end - bit_start + 1)
